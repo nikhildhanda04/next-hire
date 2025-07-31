@@ -22,7 +22,7 @@ export default function Queries() {
     ]
     return(
   <>
-        <div className="flex flex-col gap-14 px-52 py-36 w-full">
+        <div className="flex flex-col gap-14 px-24 md:px-52 py-36 w-full">
 
             <div className="font-primary text-5xl text-dark dark:text-light ">
                 Queries

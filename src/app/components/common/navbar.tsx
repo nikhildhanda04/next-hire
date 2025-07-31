@@ -20,16 +20,16 @@ export default function Navbar() {
 
     return(
         <>
-        <div className="fixed top-0 z-50 flex  bg-light/[0.3] backdrop-blur-xl w-full dark:bg-dark/[0.3]  flex-row items-center justify-between px-16 py-6 ">
+        <div className="md:fixed top-0 z-50 flex  bg-light/[0.3] backdrop-blur-xl w-full dark:bg-dark/[0.3]  flex-row items-center justify-between py-4 px-7 md:px-16 md:py-6 ">
             
-            <div className="font-primary text-4xl text-dark dark:text-light">
+            <div className="font-primary text-xl md:text-4xl text-dark dark:text-light">
                 {isDark ? (
                     <Rocket className="inline mr-2" size={28} fill="#FFFFF8"/> )  : (
                     <Rocket className="inline mr-2" size={28} fill="#121212" />
                     )}
                 NEXT HIRE
             </div>
-            <div className="font-secondary text-dark dark:text-light text-xl gap-14 flex flex-row items-center">
+            <div className="font-secondary text-dark dark:text-light text-xs md:text-xl gap-6 md:gap-14 flex flex-row items-center">
                 <a
                 href="#home"
                 onClick={(e) => {

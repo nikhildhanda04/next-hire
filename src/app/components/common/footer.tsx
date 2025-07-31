@@ -3,7 +3,7 @@ export default function Footer() {
         <>
         <div className="flex flex-col mask-b-from-50% bg-primary w-full overflow-hidden" >
 
-            <div className="flex flex-row px-44 pt-16 items-start justify-between ">
+            <div className="flex flex-row px-8 md:px-44 pt-16 items-start justify-between ">
 
                 <div className="flex flex-col">
 
@@ -56,7 +56,7 @@ export default function Footer() {
                 Next Hire | © 2025 All rights reserved.
             </div>
 
-            <div className="font-primary text-[51.4ch] -mt-[4vw] -mb-[22vw] text-light text-center">
+            <div className="font-primary text-[28vw] md:text-[51.4ch] md:-mt-[4vw] -mb-[20vw] md:-mb-[22vw] text-light text-center">
                 NEXT HIRE
             </div>
         </div>
