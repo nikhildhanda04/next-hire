@@ -3,8 +3,8 @@ import Image from "next/image";
 export default function Whyus() {
     return(
         <>
-        <div className="flex flex-col gap-12 px-8 md:px-24 lg:px-52 -mt-88 md:mt-0">
-            <div className="font-primary text-5xl pl-16 md:pl-4 text-dark dark:text-light ">
+        <div className="flex flex-col gap-12 px-4 md:px-24 lg:px-52 -mt-80 md:mt-0">
+            <div className="font-primary text-5xl pl-12 md:pl-4 text-dark dark:text-light ">
                 Why Us?
             </div>
 
