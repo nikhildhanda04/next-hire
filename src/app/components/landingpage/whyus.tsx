@@ -32,12 +32,12 @@ export default function Whyus() {
                     className="rounded-2xl  hidden md:block shadow-[0_6px_30px_rgba(0,0,0,0.1)] dark:shadow-[0_6px_40px_rgba(255,255,248,0.1)]"
                     />
                 </div>
-                <div className="font-secondary px-16 md:px-0 tracking-tight text-dark dark:text-light text-2xl font-medium ">
+                <div className="font-secondary px-8 md:px-0 tracking-tight text-dark dark:text-light text-2xl font-medium ">
                     Best-Matched Jobs <br /> <span className="font-normal text-xl text-stone-500">Personalized job cards with AI-powered match scores, real-time filters, and easy apply.</span>
                 </div>
 
 
-                                <div className="font-secondary px-16 tracking-tight text-dark dark:text-light text-2xl font-medium ">
+                <div className="font-secondary px-8 md:px-16 tracking-tight text-dark dark:text-light text-2xl font-medium ">
                     Progress Dashboard <br /> <span className="font-normal text-xl text-stone-500">Visualize your entire job search with live stats, feedback, and tracked applications.</span>
                 </div>
                 <div className="hidden md:block">
