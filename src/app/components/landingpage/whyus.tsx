@@ -10,7 +10,7 @@ export default function Whyus() {
 
             <div className="flex flex-col md:grid md:grid-cols-2 items-center jusitfy-center gap-y-8">
 
-                <div className="font-secondary px-16 tracking-tight text-dark dark:text-light text-2xl font-medium ">
+                <div className="font-secondary px-8 md:px-16 tracking-tight text-dark dark:text-light text-2xl font-medium ">
                     Smart Parsing <br /> <span className="font-normal text-xl text-stone-500">Instant resume parsing and extraction of skills, jobs, and education. Just upload your PDF or docx.</span>
                 </div>
                 <div className="hidden md:block">
