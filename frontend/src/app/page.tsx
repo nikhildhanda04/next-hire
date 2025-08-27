@@ -1,3 +1,4 @@
+// frontend\src\app\page.tsx
 import Navbar from "./components/common/navbar";
 import Hero from "./components/landingpage/hero";
 import Whyus from "./components/landingpage/whyus";
