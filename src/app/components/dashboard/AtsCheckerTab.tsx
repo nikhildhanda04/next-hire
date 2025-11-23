@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Loader2, FileText, CheckCircle, XCircle, ThumbsUp, Lightbulb, Wand2 } from 'lucide-react';
+import {  FileText, CheckCircle, XCircle, ThumbsUp, Lightbulb, Wand2 } from 'lucide-react';
 import ErrorMessage from '../common/ErrorMessage';
 import LoadingSpinner from '../common/LoadingSpinner';
 import CareerLevelButtons from './CareerLevelButtons';

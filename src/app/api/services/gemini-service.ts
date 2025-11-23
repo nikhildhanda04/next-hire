@@ -8,9 +8,9 @@ class GeminiService {
     constructor() {
         const apiKey = process.env.GOOGLE_API_KEY;
         if (!apiKey) {
-            console.error('GOOGLE_API_KEY environment variable is missing!');
-            console.error('Please ensure GOOGLE_API_KEY is set in your .env.local file in the frontend directory.');
-            throw new Error('GOOGLE_API_KEY not found. Please ensure it\'s in your .env.local file.');
+            const errorMessage = 'GOOGLE_API_KEY environment variable is missing! Please ensure GOOGLE_API_KEY is set in your environment variables.';
+            console.error(errorMessage);
+            throw new Error(errorMessage);
         }
         if (apiKey.length < 20) {
             console.warn('GOOGLE_API_KEY seems too short. Please verify it\'s correct.');
@@ -20,7 +20,11 @@ class GeminiService {
         // Use gemini-2.0-flash model (can be overridden with GEMINI_MODEL env var)
         const modelName = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
         this.baseModel = this.genAI.getGenerativeModel({ model: modelName });
-        console.log(`Using Gemini model: ${modelName}`);
+        
+        // Only log in development to avoid cluttering production logs
+        if (process.env.NODE_ENV === 'development') {
+            console.log(`Using Gemini model: ${modelName}`);
+        }
     }
 
     async generateContent(prompt: string, options?: { responseMimeType?: string }): Promise<string> {
@@ -35,7 +39,7 @@ class GeminiService {
                     const jsonModel = this.genAI.getGenerativeModel({
                         model: modelName,
                         generationConfig: {
-                            responseMimeType: 'application/json' as any,
+                            responseMimeType: 'application/json',
                         },
                     });
                     result = await jsonModel.generateContent(prompt);
@@ -71,10 +75,20 @@ class GeminiService {
 
 // Singleton instance
 let geminiServiceInstance: GeminiService | null = null;
+let initializationError: Error | null = null;
 
 export function getGeminiService(): GeminiService {
+    if (initializationError) {
+        throw initializationError;
+    }
+    
     if (!geminiServiceInstance) {
-        geminiServiceInstance = new GeminiService();
+        try {
+            geminiServiceInstance = new GeminiService();
+        } catch (error) {
+            initializationError = error instanceof Error ? error : new Error(String(error));
+            throw initializationError;
+        }
     }
     return geminiServiceInstance;
 }
