@@ -40,9 +40,12 @@ export default function Hero() {
             let extractedText = '';
 
             if (file.type === 'application/pdf') {
-                const pdfjs = await import('pdfjs-dist/build/pdf');
-                const pdfjsWorker = await import('pdfjs-dist/build/pdf.worker.entry');
-                pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorker;
+                const pdfjs = await import('pdfjs-dist');
+                // Set worker source - use CDN for production builds to avoid module resolution issues
+                // Using version 3.11.174 to match package.json
+                if (typeof window !== 'undefined') {
+                    pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`;
+                }
 
                 const data = await file.arrayBuffer();
                 const pdf = await pdfjs.getDocument(data).promise;
