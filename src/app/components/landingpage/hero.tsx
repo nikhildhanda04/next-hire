@@ -56,7 +56,10 @@ export default function Hero() {
                 for (let i = 1; i <= numPages; i++) {
                     const page = await pdf.getPage(i);
                     const textContent = await page.getTextContent();
-                    textContentStr += textContent.items.map((item: { str: string }) => item.str).join(' ');
+                    // Extract text from items - TextItem has 'str' property, TextMarkedContent does not
+                    textContentStr += textContent.items
+                        .map((item) => ('str' in item ? item.str : ''))
+                        .join(' ');
 
                     const annotations = await page.getAnnotations();
                     annotations
