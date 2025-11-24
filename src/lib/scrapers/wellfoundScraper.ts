@@ -18,14 +18,14 @@ export async function scrapeWellfoundJobs(): Promise<Job[]> {
         // Wait for job listings
         try {
             await page.waitForSelector('[data-test="JobListItem"]', { timeout: 10000 });
-        } catch (e) {
+        } catch {
             console.log('Timeout waiting for Wellfound selectors, might be blocked or empty');
             return [];
         }
 
         const jobs = await page.evaluate(() => {
             const jobElements = document.querySelectorAll('[data-test="JobListItem"]');
-            const scrapedJobs: any[] = [];
+            const scrapedJobs: { id: string; title: string; company: string; location: string; applyLink: string; source: string; status: string; description: string }[] = [];
 
             jobElements.forEach((el) => {
                 const titleEl = el.querySelector('[data-test="JobTitle"]');

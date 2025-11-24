@@ -4,7 +4,7 @@ import { generateApplicationResponse } from '@/lib/ai/applicationGenerator';
 
 export async function POST(req: Request) {
     try {
-        const { job, resumeData, rawResumeText } = await req.json();
+        const { job, rawResumeText } = await req.json();
 
         if (!job || !rawResumeText) {
             return NextResponse.json({ error: 'Missing job or resume data' }, { status: 400 });
@@ -21,11 +21,12 @@ export async function POST(req: Request) {
         try {
             coverLetter = await generateApplicationResponse(rawResumeText, jobDescription);
             console.log('Generated cover letter');
-        } catch (aiError: any) {
+        } catch (aiError) {
             console.error('AI Generation failed:', aiError);
+            const errorMessage = aiError instanceof Error ? aiError.message : 'Unknown error';
             return NextResponse.json({
                 error: 'Failed to generate cover letter. Check API key.',
-                details: aiError.message
+                details: errorMessage
             }, { status: 500 });
         }
 

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useJobStore } from '@/app/store/jobStore';
 import JobTable from './JobTable';
-import { RefreshCw, Play } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 import { ResumeData } from '@/app/store/resumeStore';
 
 interface JobsTabProps {
@@ -107,7 +107,7 @@ export default function JobsTab({ resumeData, rawResumeText }: JobsTabProps) {
                 <JobTable jobs={jobs} onApply={handleAutoApply} />
             ) : (
                 <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-                    <p className="text-gray-500 dark:text-gray-400">No jobs found. Click "Fetch Jobs" to get started.</p>
+                    <p className="text-gray-500 dark:text-gray-400">No jobs found. Click Fetch Jobs to get started.</p>
                 </div>
             )}
         </div>

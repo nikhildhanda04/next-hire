@@ -19,14 +19,11 @@ export async function scrapeYCJobs(): Promise<Job[]> {
         await page.waitForSelector('div.job-name a', { timeout: 10000 }).catch(() => console.log('Timeout waiting for selector'));
 
         const jobs = await page.evaluate(() => {
-            const jobElements = document.querySelectorAll('.job-name'); // This class is a guess, we need to be more robust
-            // If specific classes fail, we can try to find the container
-
             // Let's try to find all job cards by looking for the company logo or specific structure
             // A better approach for YC might be to find all elements that link to /companies/.../jobs/...
 
             const jobLinks = Array.from(document.querySelectorAll('a[href*="/jobs/"]'));
-            const uniqueJobs = new Map<string, any>();
+            const uniqueJobs = new Map<string, { id: string; title: string; company: string; location: string; applyLink: string; source: string; status: string; description: string }>();
 
             jobLinks.forEach(link => {
                 const href = link.getAttribute('href');
@@ -53,7 +50,8 @@ export async function scrapeYCJobs(): Promise<Job[]> {
                 // If not, fall back to previous logic or defaults
 
                 const titleElement = link; // The job link itself usually contains the title
-                const locationElement = container?.querySelector('.job-location') || container?.innerText.match(/Location:\s*(.*)/)?.[1]; // Fallback
+                const locationText = container?.querySelector('.job-location')?.textContent?.trim() || container?.innerText.match(/Location:\s*(.*)/)?.[1] || 'Remote';
+                const locationElement = typeof locationText === 'string' ? locationText : 'Remote';
 
                 const title = titleElement?.textContent?.trim() || 'Unknown Role';
 
