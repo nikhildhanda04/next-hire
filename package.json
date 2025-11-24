@@ -10,10 +10,12 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
+    "cheerio": "^1.1.2",
     "lucide-react": "^0.534.0",
     "mammoth": "^1.10.0",
     "next": "15.4.5",
     "pdfjs-dist": "3.11.174",
+    "puppeteer": "^24.31.0",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "zustand": "^5.0.8"

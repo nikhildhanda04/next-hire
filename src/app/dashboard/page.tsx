@@ -8,6 +8,7 @@ import { BarChart, BookOpen } from 'lucide-react';
 // Import the new child components
 import ResumeDetailsTab from '@/app/components/dashboard/ResumeDetailsTab';
 import AtsCheckerTab from '@/app/components/dashboard/AtsCheckerTab';
+import JobsTab from '@/app/components/dashboard/JobsTab';
 
 export default function DashboardPage() {
     const router = useRouter();
@@ -15,7 +16,7 @@ export default function DashboardPage() {
     const rawResumeText = useResumeStore((state) => state.rawResumeText);
 
     // State for the active tab is now the primary state managed by this page
-    const [activeTab, setActiveTab] = useState<'resume' | 'ats'>('resume');
+    const [activeTab, setActiveTab] = useState<'resume' | 'ats' | 'jobs'>('resume');
 
     useEffect(() => {
         // If there's no resume data, redirect to the home page to upload one.
@@ -45,25 +46,33 @@ export default function DashboardPage() {
                     <nav className="-mb-px flex space-x-6" aria-label="Tabs">
                         <button
                             onClick={() => setActiveTab('resume')}
-                            className={`${
-                                activeTab === 'resume'
-                                    ? 'border-primary text-primary'
-                                    : 'border-transparent text-stone-500 hover:text-dark dark:hover:text-light hover:border-gray-300'
-                            } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-lg transition-colors flex items-center`}
+                            className={`${activeTab === 'resume'
+                                ? 'border-primary text-primary'
+                                : 'border-transparent text-stone-500 hover:text-dark dark:hover:text-light hover:border-gray-300'
+                                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-lg transition-colors flex items-center`}
                         >
-                            <BookOpen className="mr-2 h-5 w-5"/>
+                            <BookOpen className="mr-2 h-5 w-5" />
                             Resume Details
                         </button>
                         <button
                             onClick={() => setActiveTab('ats')}
-                            className={`${
-                                activeTab === 'ats'
-                                    ? 'border-primary text-primary'
-                                    : 'border-transparent text-stone-500 hover:text-dark dark:hover:text-light hover:border-gray-300'
-                            } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-lg transition-colors flex items-center`}
+                            className={`${activeTab === 'ats'
+                                ? 'border-primary text-primary'
+                                : 'border-transparent text-stone-500 hover:text-dark dark:hover:text-light hover:border-gray-300'
+                                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-lg transition-colors flex items-center`}
                         >
-                            <BarChart className="mr-2 h-5 w-5"/>
+                            <BarChart className="mr-2 h-5 w-5" />
                             ATS Checker
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('jobs')}
+                            className={`${activeTab === 'jobs'
+                                ? 'border-primary text-primary'
+                                : 'border-transparent text-stone-500 hover:text-dark dark:hover:text-light hover:border-gray-300'
+                                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-lg transition-colors flex items-center`}
+                        >
+                            <BarChart className="mr-2 h-5 w-5" />
+                            Jobs
                         </button>
                     </nav>
                 </div>
@@ -78,6 +87,11 @@ export default function DashboardPage() {
                     {/* --- ATS Checker Tab --- */}
                     {activeTab === 'ats' && (
                         <AtsCheckerTab rawResumeText={rawResumeText} />
+                    )}
+
+                    {/* --- Jobs Tab --- */}
+                    {activeTab === 'jobs' && (
+                        <JobsTab resumeData={resumeData} rawResumeText={rawResumeText} />
                     )}
                 </div>
             </div>
