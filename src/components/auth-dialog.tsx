@@ -40,8 +40,9 @@ export function AuthDialog() {
                 provider: "google",
                 callbackURL: "/dashboard", // Redirect to dashboard after login
             })
-        } catch (err: any) {
-            setError(err.message || "Failed to sign in with Google")
+        } catch (err: unknown) {
+            const errorMessage = err instanceof Error ? err.message : "Failed to sign in with Google";
+            setError(errorMessage)
             setIsLoading(false)
         }
     }
@@ -51,7 +52,7 @@ export function AuthDialog() {
         setIsLoading(true)
         setError(null)
         try {
-            const { data, error } = await authClient.signIn.email({
+            const { error } = await authClient.signIn.email({
                 email: loginEmail,
                 password: loginPassword,
             })
@@ -59,8 +60,9 @@ export function AuthDialog() {
             setIsOpen(false)
             router.push("/dashboard")
             router.refresh()
-        } catch (err: any) {
-            setError(err.message || "Invalid email or password")
+        } catch (err: unknown) {
+            const errorMessage = err instanceof Error ? err.message : "Invalid email or password";
+            setError(errorMessage)
         } finally {
             setIsLoading(false)
         }
@@ -71,7 +73,7 @@ export function AuthDialog() {
         setIsLoading(true)
         setError(null)
         try {
-            const { data, error } = await authClient.signUp.email({
+            const { error } = await authClient.signUp.email({
                 email: signupEmail,
                 password: signupPassword,
                 name: signupName,
@@ -80,8 +82,9 @@ export function AuthDialog() {
             setIsOpen(false)
             router.push("/dashboard")
             router.refresh()
-        } catch (err: any) {
-            setError(err.message || "Failed to create account")
+        } catch (err: unknown) {
+            const errorMessage = err instanceof Error ? err.message : "Failed to create account";
+            setError(errorMessage)
         } finally {
             setIsLoading(false)
         }

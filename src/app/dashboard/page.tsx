@@ -2,7 +2,8 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useResumeStore } from '@/app/store/resumeStore';
-import { BarChart, BookOpen, User } from 'lucide-react';
+import { Upload, FileText, CheckCircle, RefreshCw, BookOpen, Briefcase, Settings, BarChart, User } from 'lucide-react';
+import { ResumeData } from '@/app/store/resumeStore';
 
 // Import the new child components
 import ResumeDetailsTab from '@/app/components/dashboard/ResumeDetailsTab';
@@ -29,7 +30,7 @@ export default function DashboardPage() {
                     const userData = await response.json();
 
                     // Always construct a ResumeData object, even if partial
-                    const reconstructedData: any = {
+                    const reconstructedData: ResumeData = {
                         full_name: userData.name,
                         email: userData.email,
                         phone_number: userData.phone,
