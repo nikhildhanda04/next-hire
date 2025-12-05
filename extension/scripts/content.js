@@ -175,6 +175,30 @@ function autofillForms(data) {
         return '';
     }
 
+    // React-compatible value setter
+    function setNativeValue(element, value) {
+        const valueDescriptor = Object.getOwnPropertyDescriptor(element, 'value');
+        const prototype = Object.getPrototypeOf(element);
+        const prototypeValueDescriptor = Object.getOwnPropertyDescriptor(prototype, 'value');
+
+        let valueSetter = null;
+
+        if (prototypeValueDescriptor && prototypeValueDescriptor.set && valueDescriptor !== prototypeValueDescriptor) {
+            valueSetter = prototypeValueDescriptor.set;
+        } else if (valueDescriptor && valueDescriptor.set) {
+            valueSetter = valueDescriptor.set;
+        }
+
+        if (valueSetter) {
+            valueSetter.call(element, value);
+        } else {
+            element.value = value;
+        }
+
+        element.dispatchEvent(new Event('input', { bubbles: true }));
+        element.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
     inputs.forEach(input => {
         if (input.type === 'hidden' || input.disabled) return;
 
@@ -197,6 +221,8 @@ function autofillForms(data) {
             testId.includes(k)
         );
 
+        console.log(`Checking input: Name="${name}", ID="${id}", Label="${label}", AutomationID="${automationId}"`);
+
         let valueToFill = null;
 
         // Normalize arrays
@@ -204,15 +230,13 @@ function autofillForms(data) {
         const educationList = data.education || [];
 
         // Name
-        // Names are almost never textareas. Prevent false positives on "Message" textareas that might have 'name' attribute.
         if (input.tagName !== 'TEXTAREA') {
-            if (isMatch('first name', 'firstname')) {
+            if (isMatch('first name', 'firstname', 'given name')) {
                 valueToFill = data.name ? data.name.split(' ')[0] : '';
-            } else if (isMatch('last name', 'lastname', 'surname')) {
+            } else if (isMatch('last name', 'lastname', 'surname', 'family name')) {
                 valueToFill = data.name ? data.name.split(' ').slice(1).join(' ') : '';
             } else if (isMatch('full name', 'fullname', 'your name', 'name') &&
-                !isMatch('username', 'company', 'project', 'host', 'college', 'university', 'school', 'institution', 'employer', 'message', 'cover', 'intro', 'note')) {
-                // Avoid matching 'Project Name', 'Company Name', 'Message', or 'Cover Letter' as User Name
+                !isMatch('project', 'company', 'host', 'school', 'institution', 'employer', 'message', 'cover', 'intro')) {
                 valueToFill = data.name;
             }
         }
@@ -227,7 +251,7 @@ function autofillForms(data) {
             valueToFill = data.phone || data.phone_number || '';
         }
 
-        // Links (Prioritize over Location to avoid "Link Address" or similar confusion)
+        // Links
         else if (isMatch('linkedin')) {
             valueToFill = data.linkedin_url || data.linkedin || '';
         }
@@ -238,10 +262,18 @@ function autofillForms(data) {
             valueToFill = data.portfolio_url || data.portfolio || '';
         }
 
-        // Location
-        else if (isMatch('location', 'city', 'address', 'where are you based') &&
+        // Location - Address Line 1 / City
+        else if (isMatch('address line 1', 'street', 'address')) {
+            // For Address Line 1, we often just dump the full location or street if we had it. 
+            // Since we only have 'location' (e.g. Bhopal, MP), we use that.
+            valueToFill = data.location || '';
+        }
+        else if (isMatch('city', 'town') && !isMatch('university', 'college', 'school', 'employer')) {
+            // Extract city if possible, or just use full location string
+            valueToFill = data.location ? data.location.split(',')[0].trim() : '';
+        }
+        else if (isMatch('location', 'where are you based') &&
             !isMatch('zip', 'postal', 'code', 'pin', 'zipcode', 'job', 'company', 'employer', 'school', 'university', 'college', 'url', 'website', 'link')) {
-            // Exclude "Job Location", "Company Address", "School City" etc from using User's Home Location
             valueToFill = data.location || '';
         }
 
@@ -252,8 +284,6 @@ function autofillForms(data) {
                 input.placeholder = 'Finding postal code...';
 
                 activeInput = input;
-                // Clear any previous value if needed, but usually empty if we are here
-
                 const location = data.location || "the user's location";
                 const questionPrompt = `What is the postal code for the address: "${location}"? Return ONLY the code.`;
 
@@ -270,7 +300,7 @@ function autofillForms(data) {
             }
         }
 
-        // Education / University
+        // Education
         else if (isMatch('college', 'university', 'institution', 'school', 'education')) {
             if (Array.isArray(educationList) && educationList.length > schoolIndex) {
                 valueToFill = educationList[schoolIndex].institution || '';
@@ -278,7 +308,7 @@ function autofillForms(data) {
             }
         }
 
-        // Current Job Title (Iterative)
+        // Job Title
         else if (isMatch('job title', 'role', 'current position', 'designation')) {
             if (Array.isArray(workExperience) && workExperience.length > jobTitleIndex) {
                 valueToFill = workExperience[jobTitleIndex].job_title || '';
@@ -286,7 +316,7 @@ function autofillForms(data) {
             }
         }
 
-        // Current Company (Iterative)
+        // Company
         else if (isMatch('company', 'employer', 'current organization') && !isMatch('summary', 'description')) {
             if (Array.isArray(workExperience) && workExperience.length > companyIndex) {
                 valueToFill = workExperience[companyIndex].company || '';
@@ -294,41 +324,36 @@ function autofillForms(data) {
             }
         }
 
-        // Smart AI Fields (Generic fallback for known complex fields)
-        // We catch these specifically to trigger AI generation
+        // Smart AI Fields
         else if (isMatch('salary', 'expected', 'notice', 'experience', 'years', 'availability', 'gender', 'race', 'ethnicity', 'veteran', 'disability', 'citizenship', 'authorization', 'sponsorship')) {
+            // ... existing AI logic
             if (!input.value) {
-                input.style.border = '2px solid #FFCC00'; // Light orange while queued
+                input.style.border = '2px solid #FFCC00';
                 input.placeholder = 'Queued for AI...';
-
                 aiQueue.push({
                     input: input,
                     prompt: label || placeholder || name || "Question",
                     context: "Page Context: " + document.body.innerText.substring(0, 2000)
                 });
-
                 report.push({
                     field: label || 'AI Smart Field',
                     value: 'Queued...'
                 });
             }
         }
-        // Cover Letter / Summary / Open-ended questions
+        // TextArea / Open-ended
         else if (input.tagName === 'TEXTAREA' ||
             (input.tagName === 'INPUT' && input.type === 'text' &&
                 isMatch('why', 'describe', 'tell', 'what', 'how', 'summary', 'about', 'cover'))) {
 
-            // This is a complex field, use AI
-            if (!input.value) { // Only fill if empty
+            if (!input.value) {
                 input.style.border = '2px solid #FFCC00';
                 input.placeholder = 'Queued for AI...';
-
                 aiQueue.push({
                     input: input,
                     prompt: label || placeholder || name || "Tell us about yourself",
                     context: document.body.innerText.substring(0, 5000)
                 });
-
                 report.push({
                     field: (label || placeholder || name || 'AI Field') + ' (Queued)',
                     value: 'Queued...'
@@ -337,11 +362,22 @@ function autofillForms(data) {
         }
 
         if (valueToFill) {
+            console.log(`MATCH FOUND: Filling "${valueToFill}" into ${name} (${label})`);
+
+            // Try standard value set first for visual feedback
             input.value = valueToFill;
-            input.dispatchEvent(new Event('input', { bubbles: true }));
-            input.dispatchEvent(new Event('change', { bubbles: true }));
-            input.style.backgroundColor = '#e6fffa'; // Highlight filled fields
+            input.style.backgroundColor = '#e6fffa';
             input.style.border = '2px solid #10b981';
+
+            // Then try React/Native setter
+            try {
+                setNativeValue(input, valueToFill);
+            } catch (e) {
+                console.error("Failed to set native value:", e);
+                // Fallback to dispatching events on input
+                input.dispatchEvent(new Event('input', { bubbles: true }));
+                input.dispatchEvent(new Event('change', { bubbles: true }));
+            }
 
             report.push({
                 field: label || placeholder || name || id || 'Unknown Field',
