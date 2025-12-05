@@ -129,6 +129,52 @@ function autofillForms(data) {
     let jobTitleIndex = 0;
     let companyIndex = 0;
 
+    // Helper to find label or related text (Improved)
+    function findLabel(input) {
+        // 1. Check strict <label for="id">
+        if (input.id) {
+            const label = document.querySelector(`label[for="${input.id}"]`);
+            if (label) return label.innerText;
+        }
+
+        // 2. Check parent <label>
+        const parentLabel = input.closest('label');
+        if (parentLabel) return parentLabel.innerText;
+
+        // 3. Check aria-label or aria-labelledby
+        const ariaLabel = input.getAttribute('aria-label');
+        if (ariaLabel) return ariaLabel;
+
+        // 4. Check preceding sibling (common in React/Tailwind forms)
+        let sibling = input.previousElementSibling;
+        let checks = 0;
+        while (sibling && checks < 3) { // Check closest 3 siblings
+            if (sibling.innerText && sibling.innerText.length > 0 && sibling.innerText.length < 100) {
+                return sibling.innerText;
+            }
+            sibling = sibling.previousElementSibling;
+            checks++;
+        }
+
+        // 5. Check parent's previous sibling (wrapped input case)
+        const parent = input.parentElement;
+        if (parent) {
+            let parentSibling = parent.previousElementSibling;
+            if (parentSibling && parentSibling.innerText && parentSibling.innerText.length < 100) {
+                return parentSibling.innerText;
+            }
+            // Go one level higher for deep nesting (common in Workday/Taleo)
+            const grandParent = parent.parentElement;
+            if (grandParent) {
+                const grandParentSibling = grandParent.previousElementSibling;
+                if (grandParentSibling && grandParentSibling.innerText && grandParentSibling.innerText.length < 100) {
+                    return grandParentSibling.innerText;
+                }
+            }
+        }
+        return '';
+    }
+
     inputs.forEach(input => {
         if (input.type === 'hidden' || input.disabled) return;
 
@@ -136,10 +182,19 @@ function autofillForms(data) {
         const id = (input.id || '').toLowerCase();
         const placeholder = (input.placeholder || '').toLowerCase();
         const label = findLabel(input)?.toLowerCase() || '';
+        const type = (input.type || '').toLowerCase();
+        const autocomplete = (input.autocomplete || '').toLowerCase();
+        const automationId = (input.getAttribute('data-automation-id') || '').toLowerCase(); // Workday
+        const testId = (input.getAttribute('data-testid') || '').toLowerCase();
 
         // Helper to check matches
         const isMatch = (...keywords) => keywords.some(k =>
-            name.includes(k) || id.includes(k) || placeholder.includes(k) || label.includes(k)
+            name.includes(k) ||
+            id.includes(k) ||
+            placeholder.includes(k) ||
+            label.includes(k) ||
+            automationId.includes(k) ||
+            testId.includes(k)
         );
 
         let valueToFill = null;
@@ -163,7 +218,7 @@ function autofillForms(data) {
         }
 
         // Email
-        else if (isMatch('email') && input.type !== 'file') {
+        else if ((isMatch('email') || type === 'email' || autocomplete === 'email') && input.type !== 'file') {
             valueToFill = data.email;
         }
 
