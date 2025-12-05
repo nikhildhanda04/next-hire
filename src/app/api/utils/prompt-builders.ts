@@ -7,10 +7,11 @@ export function buildResumeParsePrompt(resumeText: string): string {
     You are an expert, highly meticulous resume parser. Your task is to extract information into a structured JSON object
     that strictly adheres to the provided schema. Do not add any extra explanations or text outside the JSON object.
     **Detailed Extraction Instructions:**
-    1.  **Contact Info:** Extract all personal details.
-    2.  **Categorized Skills:** Analyze and group all skills into the correct categories.
-    3.  **Certifications & Languages:** Extract any certifications and languages listed.
-    4.  **Project URLs:** Use the "--- Extracted Hyperlinks ---" section to find the correct URL for each project.
+    1.  **Contact Info:** Extract all personal details (Name, Email, Phone, Location).
+    2.  **Profile Links:** Extract LinkedIn, GitHub, and Portfolio URLs. Look for them in the text AND the "--- Extracted Hyperlinks ---" section. prioritize full URLs.
+    3.  **Categorized Skills:** Analyze and group all skills into the correct categories.
+    4.  **Certifications & Languages:** Extract any certifications and languages listed.
+    5.  **Project URLs:** Use the "--- Extracted Hyperlinks ---" section to find the correct URL for each project.
     JSON Schema:
     ${JSON.stringify(resumeOutputSchema, null, 2)}
     Resume Text:
@@ -95,3 +96,27 @@ export function getCareerLevelPersona(careerLevel: string): { persona: string; e
     return personas[careerLevel as keyof typeof personas] || personas['Mid Level'];
 }
 
+
+export function buildSmartAutofillPrompt(
+    question: string,
+    resumeText: string,
+    userName: string,
+    pageContext?: string
+): string {
+    return `
+    You are ${userName}. You are filling out a job application.
+    
+    Job/Company Context from Page:
+    "${pageContext || 'No specific context provided.'}"
+
+    Your Resume:
+    "${resumeText}"
+
+    Question: "${question}"
+
+    Task: Write a professional, concise, and tailored answer to the question based on your resume and the job context provided.
+    Tailor your answer to the company/job description if possible.
+    Do not include any introductory text like "Here is an answer". Just provide the answer text directly.
+    keep it short and crisp.
+    `;
+}

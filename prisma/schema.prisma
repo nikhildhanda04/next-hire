@@ -1,0 +1,94 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified Boolean?
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  sessions      Session[]
+  accounts      Account[]
+  
+  // Profile fields for autofill
+  skills        String[]
+  phone         String?   // Extracted phone number
+  location      String?   // Extracted location
+  linkedin      String?   // Extracted LinkedIn URL
+  github        String?   // Extracted GitHub URL
+  portfolio     String?   // Extracted Portfolio URL
+  resumeText    String?   // Parsed resume text
+  experience    Json?     // Structured experience data
+  education     Json?     // Structured education data
+  
+  applications  JobApplication[]
+}
+
+model Session {
+  id        String   @id
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+}
+
+model Account {
+  id                    String    @id
+  userId                String
+  accountId             String    // Provider's user ID (e.g., Google's sub)
+  providerId            String    // Provider name (e.g., "google")
+  accessToken           String?
+  refreshToken          String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  idToken               String?
+  expiresAt             DateTime?
+  password              String?   // For email/password auth
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime? @default(now())
+  updatedAt  DateTime? @updatedAt
+}
+
+model JobApplication {
+  id          String   @id @default(cuid())
+  userId      String
+  jobTitle    String
+  companyName String
+  jobUrl      String
+  status      String   @default("applied") // applied, interview, offer, rejected
+  appliedAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+}

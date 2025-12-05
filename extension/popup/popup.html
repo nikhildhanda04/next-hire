@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Next Hire Autofill</title>
+    <style>
+        :root {
+            --primary: #FF9500;
+            --primary-hover: #e68a00;
+            --bg-light: #FFFFF8;
+            --text-dark: #121212;
+            --success: #10b981;
+            --border: #e5e7eb;
+        }
+
+        body {
+            width: 320px;
+            padding: 0;
+            margin: 0;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+        }
+
+        .header {
+            background-color: var(--text-dark);
+            color: var(--bg-light);
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo {
+            width: 24px;
+            height: 24px;
+            object-fit: contain;
+        }
+
+        .title {
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .content {
+            padding: 16px;
+        }
+
+        .card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .status {
+            font-size: 13px;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #ccc;
+        }
+
+        .status-dot.active {
+            background-color: var(--success);
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+
+        button:hover:not(:disabled) {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        button:disabled {
+            background-color: #e5e5e5;
+            color: #999;
+            cursor: not-allowed;
+        }
+
+        .report-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #888;
+            font-weight: 700;
+            margin: 16px 0 8px 0;
+            letter-spacing: 0.5px;
+        }
+
+        #report-list {
+            padding: 0;
+            margin: 0;
+            list-style: none;
+        }
+
+        #report-list li {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        #report-list li:last-child {
+            border-bottom: none;
+        }
+
+        .field-name {
+            font-weight: 500;
+            color: #444;
+        }
+
+        .field-value {
+            color: var(--success);
+            max-width: 140px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <img src="../icons/icon48.png" class="logo" alt="Logo">
+        <div class="title">NEXT HIRE</div>
+    </div>
+
+    <div class="content">
+        <div id="status-card" class="card">
+            <div id="status" class="status">
+                <div class="status-dot"></div>
+                <span>Checking login...</span>
+            </div>
+            <div id="user-info" class="status hidden">
+                <div class="status-dot active"></div>
+                <span id="user-name">User</span>
+            </div>
+        </div>
+
+        <button id="autofill-btn" disabled>
+            <span>Autofill Application</span>
+        </button>
+
+        <p id="error-msg" style="color: #ef4444; font-size: 12px; margin-top: 10px;" class="hidden"></p>
+
+        <div id="report" class="hidden">
+            <div class="report-title">Autofill Report</div>
+            <ul id="report-list"></ul>
+        </div>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+
+</html>

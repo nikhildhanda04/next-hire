@@ -57,6 +57,18 @@ const ResumeDetailsTab: React.FC<ResumeDetailsTabProps> = ({ resumeData }) => {
                         </div>
                     </SectionCard>
                 )}
+
+                {!resumeData.categorized_skills && resumeData.uncategorized_skills && resumeData.uncategorized_skills.length > 0 && (
+                    <SectionCard title="Skills">
+                        <div className="flex flex-wrap gap-2">
+                            {resumeData.uncategorized_skills.map((skill, index) => (
+                                <span key={index} className="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-stone-700 dark:text-stone-300 rounded-full text-sm font-medium">
+                                    {skill}
+                                </span>
+                            ))}
+                        </div>
+                    </SectionCard>
+                )}
             </aside>
 
             {/* Main Content (Scrollable) */}

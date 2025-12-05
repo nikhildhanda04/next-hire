@@ -1,32 +1,80 @@
-'use client';
-
+'use client'
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useResumeStore } from '@/app/store/resumeStore';
-import { BarChart, BookOpen } from 'lucide-react';
+import { BarChart, BookOpen, User } from 'lucide-react';
 
 // Import the new child components
 import ResumeDetailsTab from '@/app/components/dashboard/ResumeDetailsTab';
 import AtsCheckerTab from '@/app/components/dashboard/AtsCheckerTab';
 import JobsTab from '@/app/components/dashboard/JobsTab';
+import ProfileTab from '@/app/components/dashboard/ProfileTab';
+import { Button } from '@/components/ui/button';
 
 export default function DashboardPage() {
     const router = useRouter();
     const resumeData = useResumeStore((state) => state.resumeData);
     const rawResumeText = useResumeStore((state) => state.rawResumeText);
+    const setResumeData = useResumeStore((state) => state.setResumeData);
+    const setRawResumeText = useResumeStore((state) => state.setRawResumeText);
 
-    // State for the active tab is now the primary state managed by this page
-    const [activeTab, setActiveTab] = useState<'resume' | 'ats' | 'jobs'>('resume');
+    const [activeTab, setActiveTab] = useState<'profile' | 'resume' | 'ats' | 'jobs'>('profile');
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        // If there's no resume data, redirect to the home page to upload one.
-        if (!resumeData) {
-            router.push('/');
-        }
-    }, [resumeData, router]);
+        const fetchProfile = async () => {
+            try {
+                const response = await fetch('/api/user/profile');
+                if (response.ok) {
+                    const userData = await response.json();
 
-    // Render a loading state while data is being checked or redirecting.
-    if (!resumeData) {
+                    // Always construct a ResumeData object, even if partial
+                    const reconstructedData: any = {
+                        full_name: userData.name,
+                        email: userData.email,
+                        phone_number: userData.phone,
+                        location: userData.location,
+                        linkedin_url: userData.linkedin,
+                        github_url: userData.github,
+                        portfolio_url: userData.portfolio,
+
+                        // Resume specific fields - might be null/undefined if not parsed yet
+                        uncategorized_skills: userData.skills || [],
+                        work_experience: userData.experience || [],
+                        education: userData.education || [],
+                        summary: userData.resumeText ? userData.resumeText.substring(0, 500) : '',
+                    };
+
+                    if (userData.resumeText) {
+                        setRawResumeText(userData.resumeText);
+                    }
+
+                    setResumeData(reconstructedData);
+
+                    // If we have resume text, default to resume tab, else profile
+                    if (userData.resumeText) {
+                        setActiveTab('resume');
+                    } else {
+                        setActiveTab('profile');
+                    }
+                }
+            } catch (error) {
+                console.error("Failed to fetch profile", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        if (!resumeData) {
+            fetchProfile();
+        } else {
+            setIsLoading(false);
+        }
+    }, [resumeData, setResumeData, setRawResumeText]);
+
+    const hasResume = !!rawResumeText || (resumeData?.summary && resumeData.summary.length > 0);
+
+    if (isLoading) {
         return (
             <div className="flex items-center justify-center min-h-screen bg-light dark:bg-dark">
                 <div className="text-center">
@@ -37,13 +85,28 @@ export default function DashboardPage() {
         );
     }
 
+    if (!resumeData) {
+        // Fallback if fetch failed completely
+        return <div className="p-8 text-center">Failed to load profile. Please try refreshing.</div>;
+    }
+
     return (
         <div className="bg-light dark:bg-dark min-h-screen font-secondary">
             <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
 
                 {/* --- Tab Navigation --- */}
-                <div className="mb-8 border-b border-gray-200 dark:border-gray-700">
+                <div className="mb-8 border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
                     <nav className="-mb-px flex space-x-6" aria-label="Tabs">
+                        <button
+                            onClick={() => setActiveTab('profile')}
+                            className={`${activeTab === 'profile'
+                                ? 'border-primary text-primary'
+                                : 'border-transparent text-stone-500 hover:text-dark dark:hover:text-light hover:border-gray-300'
+                                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-lg transition-colors flex items-center`}
+                        >
+                            <User className="mr-2 h-5 w-5" />
+                            Profile
+                        </button>
                         <button
                             onClick={() => setActiveTab('resume')}
                             className={`${activeTab === 'resume'
@@ -79,14 +142,36 @@ export default function DashboardPage() {
 
                 {/* --- Tab Content --- */}
                 <div>
+                    {/* --- Profile Tab --- */}
+                    {activeTab === 'profile' && (
+                        <ProfileTab resumeData={resumeData} />
+                    )}
+
                     {/* --- Resume Details Tab --- */}
                     {activeTab === 'resume' && (
-                        <ResumeDetailsTab resumeData={resumeData} />
+                        hasResume ? (
+                            <ResumeDetailsTab resumeData={resumeData} />
+                        ) : (
+                            <div className="text-center py-20 bg-white dark:bg-neutral-900 rounded-lg border border-dashed border-gray-300 dark:border-gray-700">
+                                <h3 className="text-xl font-semibold mb-3">No Resume Found</h3>
+                                <p className="text-stone-500 mb-6">Upload your resume to see extracted details and get AI insights.</p>
+                                <Button onClick={() => router.push('/')}>
+                                    Upload Resume
+                                </Button>
+                            </div>
+                        )
                     )}
 
                     {/* --- ATS Checker Tab --- */}
                     {activeTab === 'ats' && (
-                        <AtsCheckerTab rawResumeText={rawResumeText} />
+                        hasResume ? (
+                            <AtsCheckerTab rawResumeText={rawResumeText} />
+                        ) : (
+                            <div className="text-center py-20">
+                                <p>Please upload a resume first to use the ATS Checker.</p>
+                            </div>
+                        )
+
                     )}
 
                     {/* --- Jobs Tab --- */}

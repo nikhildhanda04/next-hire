@@ -16,11 +16,11 @@ class GeminiService {
             console.warn('GOOGLE_API_KEY seems too short. Please verify it\'s correct.');
         }
         this.genAI = new GoogleGenerativeAI(apiKey);
-        
+
         // Use gemini-2.0-flash model (can be overridden with GEMINI_MODEL env var)
         const modelName = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
         this.baseModel = this.genAI.getGenerativeModel({ model: modelName });
-        
+
         // Only log in development to avoid cluttering production logs
         if (process.env.NODE_ENV === 'development') {
             console.log(`Using Gemini model: ${modelName}`);
@@ -30,7 +30,7 @@ class GeminiService {
     async generateContent(prompt: string, options?: { responseMimeType?: string }): Promise<string> {
         try {
             let result;
-            
+
             // Try with responseMimeType if specified
             if (options?.responseMimeType === 'application/json') {
                 try {
@@ -55,11 +55,11 @@ class GeminiService {
 
             const response = await result.response;
             const text = response.text();
-            
+
             if (!text || text.trim().length === 0) {
                 throw new Error('Empty response from Gemini API');
             }
-            
+
             return text;
         } catch (error) {
             console.error('Gemini API Error:', error);
@@ -68,6 +68,15 @@ class GeminiService {
                 console.error('Error message:', error.message);
                 console.error('Error stack:', error.stack);
             }
+            throw error;
+        }
+    }
+
+    async generateContentStream(prompt: string) {
+        try {
+            return await this.baseModel.generateContentStream(prompt);
+        } catch (error) {
+            console.error('Gemini Stream API Error:', error);
             throw error;
         }
     }
@@ -81,7 +90,7 @@ export function getGeminiService(): GeminiService {
     if (initializationError) {
         throw initializationError;
     }
-    
+
     if (!geminiServiceInstance) {
         try {
             geminiServiceInstance = new GeminiService();

@@ -56,6 +56,7 @@ export interface ResumeData {
     portfolio_url?: string | null; // <-- ADDED
     summary?: string | null;
     categorized_skills?: CategorizedSkills; // <-- UPGRADED
+    uncategorized_skills?: string[]; // <-- ADDED for fallback
     work_experience?: WorkExperience[];
     education?: Education[];
     projects?: Project[];
