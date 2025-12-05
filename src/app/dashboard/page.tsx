@@ -29,7 +29,8 @@ export default function DashboardPage() {
                 if (response.ok) {
                     const userData = await response.json();
 
-                    // Always construct a ResumeData object, even if partial
+
+
                     const reconstructedData: ResumeData = {
                         full_name: userData.name,
                         email: userData.email,
@@ -95,60 +96,60 @@ export default function DashboardPage() {
         <div className="bg-light dark:bg-dark min-h-screen font-secondary">
             <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
 
-                {/* --- Tab Navigation --- */}
-                <div className="mb-8 border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
-                    <nav className="-mb-px flex space-x-6" aria-label="Tabs">
-                        <button
-                            onClick={() => setActiveTab('profile')}
-                            className={`${activeTab === 'profile'
-                                ? 'border-primary text-primary'
-                                : 'border-transparent text-stone-500 hover:text-dark dark:hover:text-light hover:border-gray-300'
-                                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-lg transition-colors flex items-center`}
-                        >
-                            <User className="mr-2 h-5 w-5" />
-                            Profile
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('resume')}
-                            className={`${activeTab === 'resume'
-                                ? 'border-primary text-primary'
-                                : 'border-transparent text-stone-500 hover:text-dark dark:hover:text-light hover:border-gray-300'
-                                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-lg transition-colors flex items-center`}
-                        >
-                            <BookOpen className="mr-2 h-5 w-5" />
-                            Resume Details
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('ats')}
-                            className={`${activeTab === 'ats'
-                                ? 'border-primary text-primary'
-                                : 'border-transparent text-stone-500 hover:text-dark dark:hover:text-light hover:border-gray-300'
-                                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-lg transition-colors flex items-center`}
-                        >
-                            <BarChart className="mr-2 h-5 w-5" />
-                            ATS Checker
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('jobs')}
-                            className={`${activeTab === 'jobs'
-                                ? 'border-primary text-primary'
-                                : 'border-transparent text-stone-500 hover:text-dark dark:hover:text-light hover:border-gray-300'
-                                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-lg transition-colors flex items-center`}
-                        >
-                            <BarChart className="mr-2 h-5 w-5" />
-                            Jobs
-                        </button>
-                    </nav>
+                <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+
+                    <div className="mb-8 border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
+                        <nav className="-mb-px flex space-x-6" aria-label="Tabs">
+                            <button
+                                onClick={() => setActiveTab('profile')}
+                                className={`${activeTab === 'profile'
+                                    ? 'border-primary text-primary'
+                                    : 'border-transparent text-stone-500 hover:text-dark dark:hover:text-light hover:border-gray-300'
+                                    } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-lg transition-colors flex items-center`}
+                            >
+                                <User className="mr-2 h-5 w-5" />
+                                Profile
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('resume')}
+                                className={`${activeTab === 'resume'
+                                    ? 'border-primary text-primary'
+                                    : 'border-transparent text-stone-500 hover:text-dark dark:hover:text-light hover:border-gray-300'
+                                    } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-lg transition-colors flex items-center`}
+                            >
+                                <BookOpen className="mr-2 h-5 w-5" />
+                                Resume Details
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('ats')}
+                                className={`${activeTab === 'ats'
+                                    ? 'border-primary text-primary'
+                                    : 'border-transparent text-stone-500 hover:text-dark dark:hover:text-light hover:border-gray-300'
+                                    } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-lg transition-colors flex items-center`}
+                            >
+                                <BarChart className="mr-2 h-5 w-5" />
+                                ATS Checker
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('jobs')}
+                                className={`${activeTab === 'jobs'
+                                    ? 'border-primary text-primary'
+                                    : 'border-transparent text-stone-500 hover:text-dark dark:hover:text-light hover:border-gray-300'
+                                    } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-lg transition-colors flex items-center`}
+                            >
+                                <BarChart className="mr-2 h-5 w-5" />
+                                Jobs
+                            </button>
+                        </nav>
+                    </div>
+
                 </div>
 
-                {/* --- Tab Content --- */}
                 <div>
-                    {/* --- Profile Tab --- */}
                     {activeTab === 'profile' && (
                         <ProfileTab resumeData={resumeData} />
                     )}
 
-                    {/* --- Resume Details Tab --- */}
                     {activeTab === 'resume' && (
                         hasResume ? (
                             <ResumeDetailsTab resumeData={resumeData} />
@@ -163,7 +164,8 @@ export default function DashboardPage() {
                         )
                     )}
 
-                    {/* --- ATS Checker Tab --- */}
+
+
                     {activeTab === 'ats' && (
                         hasResume ? (
                             <AtsCheckerTab rawResumeText={rawResumeText} />
@@ -175,7 +177,8 @@ export default function DashboardPage() {
 
                     )}
 
-                    {/* --- Jobs Tab --- */}
+
+
                     {activeTab === 'jobs' && (
                         <JobsTab resumeData={resumeData} rawResumeText={rawResumeText} />
                     )}

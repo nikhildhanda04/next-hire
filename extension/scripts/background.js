@@ -1,13 +1,12 @@
 
 // const API_BASE_URL = 'http://localhost:3000';
-const API_BASE_URL = 'https://next-hire-bice.vercel.app'; // <--- UNCOMMENT THIS FOR PRODUCTION
+const API_BASE_URL = 'https://next-hire-bice.vercel.app'; 
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    // Handler for fetching user profile (Login check)
     if (request.action === 'fetch-user-data') {
         fetch(`${API_BASE_URL}/api/user/profile`, {
             method: 'GET',
-            credentials: 'include' // Important: Send cookies
+            credentials: 'include' 
         })
             .then(response => {
                 if (!response.ok) {
@@ -23,10 +22,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 sendResponse({ success: false, error: error.message });
             });
 
-        return true; // Indicates we will respond asynchronously
+        return true;
     }
 
-    // Handler for AI Answer Generation
     if (request.action === 'generate-ai-answer') {
         fetch(`${API_BASE_URL}/api/v1/autofill/generate`, {
             method: 'POST',

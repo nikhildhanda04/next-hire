@@ -1,4 +1,4 @@
-// Content script for Next Hire Autofill
+
 
 let activeInput = null;
 const aiQueue = [];
@@ -11,9 +11,8 @@ function processQueue() {
     const { input, prompt, context } = aiQueue.shift();
 
     activeInput = input;
-    input.value = ''; // Clear for streaming
+    input.value = '';
 
-    // Update UI to show it's "next"
     input.style.border = '2px solid #FF9500';
     input.placeholder = 'Next Hire AI thinking...';
 
@@ -27,7 +26,7 @@ function processQueue() {
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'autofill') {
         const data = request.data;
-        // console.log('Next Hire: Received autofill data', data);
+        console.log('Next Hire DEBUG: Received data:', data);
 
         try {
             const report = autofillForms(data);
@@ -170,9 +169,6 @@ function autofillForms(data) {
 
         // Phone
         else if (isMatch('phone', 'mobile', 'tel', 'contact number')) {
-            // valueToFill = data.phone_number || data.phone || ''; 
-            // Note: Dashboard sends 'phone' (from User model) or we might have structured it differently.
-            // Based on previous step, User model has 'phone'.
             valueToFill = data.phone || data.phone_number || '';
         }
 

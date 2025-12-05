@@ -12,7 +12,6 @@ import { ResumeData } from '@/app/store/resumeStore';
 
 interface ProfileTabProps {
     resumeData: ResumeData;
-    //  onUpdate: () => void; // Callback to refresh data in parent
 }
 
 export default function ProfileTab({ resumeData }: ProfileTabProps) {

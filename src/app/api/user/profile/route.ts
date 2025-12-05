@@ -69,11 +69,7 @@ export async function PUT(request: NextRequest) {
                 linkedin,
                 github,
                 portfolio,
-                resumeText: summary ? summary : undefined, // Assuming summary is stored in resumeText for now if that's the intent, or we might need a separate bio field. The plan said "resumeText (summary)".
-                // Note: Updating resumeText directly with just summary might lose the full resume context if we overwrite it. 
-                // However, the prompt implies "fill more info... saved in his db". 
-                // If resumeText is the ONLY place for summary, we should be careful. 
-                // Let's assume standard fields for now. 
+                resumeText: summary ? summary : undefined,
             }
         });
 
