@@ -19,8 +19,17 @@ const nextConfig = {
       // By setting 'canvas' to false, we tell Webpack to treat it as an empty module.
       config.resolve.alias.canvas = false;
     }
-    
+
     return config;
+  },
+  experimental: {
+    turbo: {
+      resolve: {
+        alias: {
+          canvas: false,
+        },
+      },
+    },
   },
 };
 
