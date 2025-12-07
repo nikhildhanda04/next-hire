@@ -4,6 +4,7 @@ import { GoogleGenerativeAI, GenerativeModel } from '@google/generative-ai';
 class GeminiService {
     private genAI: GoogleGenerativeAI;
     private baseModel: GenerativeModel;
+    private fallbackModel: GenerativeModel;
 
     constructor() {
         const apiKey = process.env.GOOGLE_API_KEY;
@@ -17,68 +18,63 @@ class GeminiService {
         }
         this.genAI = new GoogleGenerativeAI(apiKey);
 
-        // Use gemini-2.0-flash model (can be overridden with GEMINI_MODEL env var)
-        const modelName = process.env.GEMINI_MODEL || 'gemini-2.5-flash-lite';
+        // Primary: gemini-2.5-flash (Standard Flash model from your list)
+        // Liter versions often have lower quotas. Standard Flash usually has higher throughput.
+        const modelName = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
         this.baseModel = this.genAI.getGenerativeModel({ model: modelName });
 
-        // Only log in development to avoid cluttering production logs
+        // Fallback: gemini-2.0-flash-001 (Explicit version, fallback)
+        this.fallbackModel = this.genAI.getGenerativeModel({ model: 'gemini-2.0-flash-001' });
+
         if (process.env.NODE_ENV === 'development') {
-            console.log(`Using Gemini model: ${modelName}`);
+            console.log(`Using Gemini model: ${modelName} (Fallback: gemini-2.0-flash-001)`);
+        }
+    }
+
+    private async generateWithFallback<T>(
+        operation: (model: GenerativeModel) => Promise<T>,
+        operationName: string
+    ): Promise<T> {
+        try {
+            return await operation(this.baseModel);
+        } catch (error: any) {
+            // Check for Rate Limit (429) or Overloaded (503)
+            if (error.status === 429 || error.status === 503 || error.message?.includes('429')) {
+                console.warn(`${operationName} failed with ${error.status}. Switching to fallback model...`);
+                try {
+                    return await operation(this.fallbackModel);
+                } catch (fallbackError) {
+                    console.error(`${operationName} fallback also failed.`);
+                    throw fallbackError; // Throw the original or new error? Usually new.
+                }
+            }
+            throw error;
         }
     }
 
     async generateContent(prompt: string, options?: { responseMimeType?: string }): Promise<string> {
-        try {
+        return this.generateWithFallback(async (model) => {
             let result;
-
-            // Try with responseMimeType if specified
             if (options?.responseMimeType === 'application/json') {
-                try {
-                    // Attempt to use responseMimeType in generationConfig
-                    const modelName = process.env.GEMINI_MODEL || 'gemini-2.5-flash-lite';
-                    const jsonModel = this.genAI.getGenerativeModel({
-                        model: modelName,
-                        generationConfig: {
-                            responseMimeType: 'application/json',
-                        },
-                    });
-                    result = await jsonModel.generateContent(prompt);
-                } catch (configError) {
-                    // If responseMimeType fails, fall back to regular generation
-                    console.warn('responseMimeType not supported, using regular generation:', configError);
-                    result = await this.baseModel.generateContent(prompt);
-                }
+                const jsonModel = this.genAI.getGenerativeModel({
+                    model: model.model, // Use current model name
+                    generationConfig: { responseMimeType: 'application/json' },
+                });
+                result = await jsonModel.generateContent(prompt);
             } else {
-                // Regular text response
-                result = await this.baseModel.generateContent(prompt);
+                result = await model.generateContent(prompt);
             }
-
             const response = await result.response;
             const text = response.text();
-
-            if (!text || text.trim().length === 0) {
-                throw new Error('Empty response from Gemini API');
-            }
-
+            if (!text || text.trim().length === 0) throw new Error('Empty response');
             return text;
-        } catch (error) {
-            console.error('Gemini API Error:', error);
-            // Log more details about the error
-            if (error instanceof Error) {
-                console.error('Error message:', error.message);
-                console.error('Error stack:', error.stack);
-            }
-            throw error;
-        }
+        }, 'generateContent');
     }
 
     async generateContentStream(prompt: string) {
-        try {
-            return await this.baseModel.generateContentStream(prompt);
-        } catch (error) {
-            console.error('Gemini Stream API Error:', error);
-            throw error;
-        }
+        return this.generateWithFallback(async (model) => {
+            return await model.generateContentStream(prompt);
+        }, 'generateContentStream');
     }
 }
 
