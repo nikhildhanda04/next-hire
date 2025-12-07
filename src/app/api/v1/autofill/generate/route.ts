@@ -78,13 +78,16 @@ export async function POST(request: NextRequest) {
             },
         });
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Error generating autofill answer:', error);
 
         // Handle Google API Rate Limiting (429)
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        const errorStatus = (error as { status?: number })?.status;
+
         if (
-            error.message?.includes('429') ||
-            error.status === 429 ||
+            errorMessage.includes('429') ||
+            errorStatus === 429 ||
             JSON.stringify(error).includes('Too Many Requests')
         ) {
             return NextResponse.json(

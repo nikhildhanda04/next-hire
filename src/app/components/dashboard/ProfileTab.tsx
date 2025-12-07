@@ -14,11 +14,24 @@ interface ProfileTabProps {
     resumeData: ResumeData;
 }
 
+interface ExtendedResumeData extends ResumeData {
+    preferredName?: string;
+    gender?: string;
+    race?: string;
+    veteran?: string;
+    disability?: string;
+    citizenship?: string;
+    workAuth?: string;
+    clearance?: string;
+    salary?: string;
+    noticePeriod?: string;
+}
+
 export default function ProfileTab({ resumeData }: ProfileTabProps) {
     const [isLoading, setIsLoading] = useState(false);
     const [formData, setFormData] = useState({
         name: resumeData?.full_name || '',
-        email: resumeData?.email || '', 
+        email: resumeData?.email || '',
         phone: resumeData?.phone_number || '',
         location: resumeData?.location || '',
         linkedin: resumeData?.linkedin_url || '',
@@ -26,16 +39,16 @@ export default function ProfileTab({ resumeData }: ProfileTabProps) {
         portfolio: resumeData?.portfolio_url || '',
         summary: resumeData?.summary || '',
         // New fields
-        preferredName: (resumeData as any)?.preferredName || '',
-        gender: (resumeData as any)?.gender || '',
-        race: (resumeData as any)?.race || '',
-        veteran: (resumeData as any)?.veteran || '',
-        disability: (resumeData as any)?.disability || '',
-        citizenship: (resumeData as any)?.citizenship || '',
-        workAuth: (resumeData as any)?.workAuth || '',
-        clearance: (resumeData as any)?.clearance || '',
-        salary: (resumeData as any)?.salary || '',
-        noticePeriod: (resumeData as any)?.noticePeriod || ''
+        preferredName: (resumeData as ExtendedResumeData)?.preferredName || '',
+        gender: (resumeData as ExtendedResumeData)?.gender || '',
+        race: (resumeData as ExtendedResumeData)?.race || '',
+        veteran: (resumeData as ExtendedResumeData)?.veteran || '',
+        disability: (resumeData as ExtendedResumeData)?.disability || '',
+        citizenship: (resumeData as ExtendedResumeData)?.citizenship || '',
+        workAuth: (resumeData as ExtendedResumeData)?.workAuth || '',
+        clearance: (resumeData as ExtendedResumeData)?.clearance || '',
+        salary: (resumeData as ExtendedResumeData)?.salary || '',
+        noticePeriod: (resumeData as ExtendedResumeData)?.noticePeriod || ''
     });
 
     const setResumeData = useResumeStore((state) => state.setResumeData);
