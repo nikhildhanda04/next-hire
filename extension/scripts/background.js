@@ -1,12 +1,12 @@
 
 // const API_BASE_URL = 'http://localhost:3000';
-const API_BASE_URL = 'https://next-hire-bice.vercel.app'; 
+const API_BASE_URL = 'https://next-hire-bice.vercel.app';
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'fetch-user-data') {
         fetch(`${API_BASE_URL}/api/user/profile`, {
             method: 'GET',
-            credentials: 'include' 
+            credentials: 'include'
         })
             .then(response => {
                 if (!response.ok) {

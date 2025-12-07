@@ -52,7 +52,7 @@ export default function Hero() {
                 const numPages = pdf.numPages;
                 let textContentStr = '';
                 const allUrls: string[] = [];
-                
+
                 for (let i = 1; i <= numPages; i++) {
                     const page = await pdf.getPage(i);
                     const textContent = await page.getTextContent();
@@ -68,7 +68,7 @@ export default function Hero() {
                 }
 
                 extractedText = textContentStr;
-                
+
                 if (allUrls.length > 0) {
                     const uniqueUrls = [...new Set(allUrls)];
                     extractedText += '\n\n--- Extracted Hyperlinks ---\n' + uniqueUrls.join('\n');
@@ -77,7 +77,7 @@ export default function Hero() {
             } else if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
                 const mammoth = (await import('mammoth')).default;
                 const arrayBuffer = await file.arrayBuffer();
-                
+
                 const { value: html } = await mammoth.convertToHtml({ arrayBuffer });
                 const { value: text } = await mammoth.extractRawText({ arrayBuffer });
                 extractedText = text;
@@ -107,7 +107,7 @@ export default function Hero() {
             alert('There was an error parsing your resume. Please try again.');
         } finally {
             setIsLoading(false);
-            if(fileInputRef.current) {
+            if (fileInputRef.current) {
                 fileInputRef.current.value = '';
             }
         }
