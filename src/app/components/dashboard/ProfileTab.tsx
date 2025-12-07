@@ -18,7 +18,7 @@ export default function ProfileTab({ resumeData }: ProfileTabProps) {
     const [isLoading, setIsLoading] = useState(false);
     const [formData, setFormData] = useState({
         name: resumeData?.full_name || '',
-        email: resumeData?.email || '', // Read only
+        email: resumeData?.email || '', 
         phone: resumeData?.phone_number || '',
         location: resumeData?.location || '',
         linkedin: resumeData?.linkedin_url || '',
