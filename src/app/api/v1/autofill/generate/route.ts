@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { prisma } from '@/lib/prisma';
-import { getAIService } from '@/app/api/services/ai-service';
+import { getGeminiService } from '@/app/api/services/gemini-service';
 import { buildSmartAutofillPrompt } from '@/app/api/utils/prompt-builders';
 import { z } from 'zod';
 import { rateLimit } from '@/lib/rate-limit';
@@ -51,10 +51,10 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Resume not found. Please upload a resume first.' }, { status: 404 });
         }
 
-        const aiService = getAIService();
+        const geminiService = getGeminiService();
         const prompt = buildSmartAutofillPrompt(question, user.resumeText, user.name || 'Candidate', context);
 
-        const streamResult = await aiService.generateContentStream(prompt);
+        const streamResult = await geminiService.generateContentStream(prompt);
 
         const encoder = new TextEncoder();
         const readable = new ReadableStream({

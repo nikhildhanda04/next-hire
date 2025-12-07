@@ -1,6 +1,6 @@
 // AI helper functions for resume parsing and ATS analysis
 
-import { getAIService } from '../services/ai-service';
+import { getGeminiService } from '../services/gemini-service';
 import { extractJsonFromResponse } from './json-parser';
 import {
     buildResumeParsePrompt,
@@ -13,11 +13,11 @@ import { ResumeOutput, ATSAnalysisOutput, RewriteSuggestion } from '../types';
 
 // Parse resume with AI
 export async function parseResumeWithAI(resumeText: string): Promise<ResumeOutput> {
-    const aiService = getAIService();
+    const geminiService = getGeminiService();
     const prompt = buildResumeParsePrompt(resumeText);
 
     try {
-        const responseText = await aiService.generateContent(prompt, {
+        const responseText = await geminiService.generateContent(prompt, {
             responseMimeType: 'application/json',
         });
 
@@ -44,11 +44,11 @@ export async function parseResumeWithAI(resumeText: string): Promise<ResumeOutpu
 
 // Stage 1: Identify improvable bullets
 async function identifyImprovableBullets(resumeText: string, context: string): Promise<string[]> {
-    const aiService = getAIService();
+    const geminiService = getGeminiService();
     const prompt = buildImprovableBulletsPrompt(resumeText, context);
 
     try {
-        const responseText = await aiService.generateContent(prompt, {
+        const responseText = await geminiService.generateContent(prompt, {
             responseMimeType: 'application/json',
         });
         const bullets = JSON.parse(responseText);
@@ -61,11 +61,11 @@ async function identifyImprovableBullets(resumeText: string, context: string): P
 
 // Stage 2: Refine a single bullet point
 async function refineBulletPoint(bullet: string, context: string): Promise<string> {
-    const aiService = getAIService();
+    const geminiService = getGeminiService();
     const prompt = buildRefineBulletPrompt(bullet, context);
 
     try {
-        const responseText = await aiService.generateContent(prompt);
+        const responseText = await geminiService.generateContent(prompt);
         return responseText.trim();
     } catch (error) {
         console.error('Error refining bullet point:', error);
@@ -83,7 +83,7 @@ export async function analyzeATSWithAI(
         throw new Error('Either job_description or career_level must be provided.');
     }
 
-    const aiService = getAIService();
+    const geminiService = getGeminiService();
 
     let persona = '';
     let evaluationPhilosophy = '';
@@ -103,7 +103,7 @@ export async function analyzeATSWithAI(
     const mainPrompt = buildATSAnalysisPrompt(resumeText, persona, evaluationPhilosophy, analysisContext);
 
     try {
-        const responseText = await aiService.generateContent(mainPrompt, {
+        const responseText = await geminiService.generateContent(mainPrompt, {
             responseMimeType: 'application/json',
         });
         const analysisData = extractJsonFromResponse(responseText) as unknown as ATSAnalysisOutput;

@@ -18,7 +18,7 @@ class GeminiService {
         this.genAI = new GoogleGenerativeAI(apiKey);
 
         // Use gemini-2.0-flash model (can be overridden with GEMINI_MODEL env var)
-        const modelName = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
+        const modelName = process.env.GEMINI_MODEL || 'gemini-1.5-flash';
         this.baseModel = this.genAI.getGenerativeModel({ model: modelName });
 
         // Only log in development to avoid cluttering production logs
@@ -35,7 +35,7 @@ class GeminiService {
             if (options?.responseMimeType === 'application/json') {
                 try {
                     // Attempt to use responseMimeType in generationConfig
-                    const modelName = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
+                    const modelName = process.env.GEMINI_MODEL || 'gemini-1.5-flash';
                     const jsonModel = this.genAI.getGenerativeModel({
                         model: modelName,
                         generationConfig: {
