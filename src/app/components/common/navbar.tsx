@@ -7,15 +7,28 @@ import { AuthDialog } from "@/components/auth-dialog";
 import { useEffect, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 
+import { useRouter } from "next/navigation";
+
 export default function Navbar() {
     const session = authClient.useSession();
+    const router = useRouter();
+    const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
 
     const scrollToSection = (sectionId: string) => {
         const section = document.getElementById(sectionId);
         if (section) {
             section.scrollIntoView({ behavior: "smooth" });
         }
-    }
+    };
+
+    const handleDashboardClick = (e: React.MouseEvent) => {
+        e.preventDefault();
+        if (session?.data?.user) {
+            router.push("/dashboard");
+        } else {
+            setIsAuthDialogOpen(true);
+        }
+    };
 
     const [isDark, setIsDark] = useState(false);
 
@@ -36,7 +49,7 @@ export default function Navbar() {
                 </div>
                 <div className="font-secondary text-dark dark:text-light text-xs md:text-xl gap-6 md:gap-14 flex flex-row items-center">
                     <a
-                        href="#home"
+                        href="/#home"
                         onClick={(e) => {
                             e.preventDefault();
                             scrollToSection("home");
@@ -56,7 +69,7 @@ export default function Navbar() {
                         Why Us?
                     </a>
                     <a
-                        href="#queries"
+                        href="/#queries"
                         onClick={(e) => {
                             e.preventDefault();
                             scrollToSection("queries");
@@ -64,6 +77,12 @@ export default function Navbar() {
                         className=" hover:text-primary transition-all duration-200 ease-in"
                     >
                         Queries
+                    </a>
+                    <a
+                        href="/dashboard"
+                        onClick={handleDashboardClick}
+                        className=" hover:text-primary transition-all duration-200 ease-in">
+                        Dashboard
                     </a>
 
                     <div className="ml-4">
@@ -84,7 +103,7 @@ export default function Navbar() {
                                 </button>
                             </div>
                         ) : (
-                            <AuthDialog />
+                            <AuthDialog open={isAuthDialogOpen} onOpenChange={setIsAuthDialogOpen} />
                         )}
                     </div>
                 </div>

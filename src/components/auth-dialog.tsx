@@ -17,8 +17,18 @@ import { authClient } from "@/lib/auth-client"
 import { Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 
-export function AuthDialog() {
-    const [isOpen, setIsOpen] = useState(false)
+interface AuthDialogProps {
+    open?: boolean
+    onOpenChange?: (open: boolean) => void
+    children?: React.ReactNode // To allow it to be used as a wrapper if needed, or just keep it simple
+}
+
+export function AuthDialog({ open: controlledOpen, onOpenChange: setControlledOpen }: AuthDialogProps = {}) {
+    const [internalOpen, setInternalOpen] = useState(false)
+
+    const isOpen = controlledOpen !== undefined ? controlledOpen : internalOpen
+    const setIsOpen = setControlledOpen || setInternalOpen
+
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const router = useRouter()

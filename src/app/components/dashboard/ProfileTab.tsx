@@ -93,13 +93,13 @@ export default function ProfileTab({ resumeData }: ProfileTabProps) {
                     noticePeriod: formData.noticePeriod
                 };
                 setResumeData(updatedData);
-                alert('Profile updated successfully!');
+                console.log('Profile updated successfully!');
             } else {
-                alert('Failed to update profile.');
+                console.log('Failed to update profile.');
             }
         } catch (error) {
             console.error('Error updating profile:', error);
-            alert('An error occurred while updating profile.');
+           
         } finally {
             setIsLoading(false);
         }
