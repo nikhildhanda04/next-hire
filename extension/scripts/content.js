@@ -199,6 +199,32 @@ function autofillForms(data) {
         element.dispatchEvent(new Event('change', { bubbles: true }));
     }
 
+    // Helper to finding best option in a <select>
+    function findBestOption(select, text) {
+        if (!text) return -1;
+        const search = text.toLowerCase().trim();
+
+        // 1. Exact Match (Value or Text)
+        for (let i = 0; i < select.options.length; i++) {
+            const opt = select.options[i];
+            const optVal = (opt.value || '').toLowerCase();
+            const optText = (opt.innerText || '').toLowerCase();
+            if (optVal === search || optText === search) return i;
+        }
+
+        // 2. Contains Match (User data contains Option text, e.g. User="Bhopal, India", Option="India")
+        // OR Option text contains User data (User="India", Option="Republic of India")
+        for (let i = 0; i < select.options.length; i++) {
+            const opt = select.options[i];
+            const optText = (opt.innerText || '').toLowerCase().trim();
+            if (!optText) continue;
+
+            if (search.includes(optText) || optText.includes(search)) return i;
+        }
+
+        return -1;
+    }
+
     inputs.forEach(input => {
         if (input.type === 'hidden' || input.disabled) return;
 
@@ -229,67 +255,62 @@ function autofillForms(data) {
         const workExperience = data.work_experience || data.experience || [];
         const educationList = data.education || [];
 
-        // Name
-        if (input.tagName !== 'TEXTAREA') {
-            if (isMatch('first name', 'firstname', 'given name')) {
-                valueToFill = data.name ? data.name.split(' ')[0] : '';
-            } else if (isMatch('last name', 'lastname', 'surname', 'family name')) {
-                valueToFill = data.name ? data.name.split(' ').slice(1).join(' ') : '';
-            } else if (isMatch('full name', 'fullname', 'your name', 'name') &&
-                !isMatch('project', 'company', 'host', 'school', 'institution', 'employer', 'message', 'cover', 'intro')) {
-                valueToFill = data.name;
-            }
+        // Name - First Name
+        if (input.tagName !== 'TEXTAREA' && isMatch('first name', 'firstname', 'given name')) {
+            valueToFill = data.name ? data.name.split(' ')[0] : '';
+            console.log('Matched FIRST NAME rule');
+        }
+        // Name - Last Name
+        else if (input.tagName !== 'TEXTAREA' && isMatch('last name', 'lastname', 'surname', 'family name')) {
+            valueToFill = data.name ? data.name.split(' ').slice(1).join(' ') : '';
+            console.log('Matched LAST NAME rule');
+        }
+        // Name - Full Name
+        else if (input.tagName !== 'TEXTAREA' && isMatch('full name', 'fullname', 'your name', 'name') &&
+            !isMatch('project', 'company', 'host', 'school', 'institution', 'employer', 'message', 'cover', 'intro', 'preferred')) {
+            valueToFill = data.name;
+            console.log('Matched FULL NAME rule');
         }
 
         // Email
         else if ((isMatch('email') || type === 'email' || autocomplete === 'email') && input.type !== 'file') {
             valueToFill = data.email;
+            console.log('Matched EMAIL rule');
         }
 
         // Phone
         else if (isMatch('phone', 'mobile', 'tel', 'contact number')) {
             valueToFill = data.phone || data.phone_number || '';
+            console.log('Matched PHONE rule');
         }
 
         // Links
         else if (isMatch('linkedin')) {
             valueToFill = data.linkedin_url || data.linkedin || '';
+            console.log('Matched LINKEDIN rule');
         }
         else if (isMatch('github', 'git')) {
             valueToFill = data.github_url || data.github || '';
+            console.log('Matched GITHUB rule');
         }
-        else if (isMatch('portfolio', 'website', 'url', 'personal site')) {
+        else if (isMatch('portfolio', 'personal site') || (isMatch('website', 'url') && !isMatch('company', 'apply', 'job', 'description', 'employer'))) {
             valueToFill = data.portfolio_url || data.portfolio || '';
+            console.log('Matched PORTFOLIO rule');
         }
 
-        // Location - Address Line 1 / City
-        else if (isMatch('address line 1', 'street', 'address')) {
-            // For Address Line 1, we often just dump the full location or street if we had it. 
-            // Since we only have 'location' (e.g. Bhopal, MP), we use that.
-            valueToFill = data.location || '';
-        }
-        else if (isMatch('city', 'town') && !isMatch('university', 'college', 'school', 'employer')) {
-            // Extract city if possible, or just use full location string
-            valueToFill = data.location ? data.location.split(',')[0].trim() : '';
-        }
-        else if (isMatch('location', 'where are you based') &&
-            !isMatch('zip', 'postal', 'code', 'pin', 'zipcode', 'job', 'company', 'employer', 'school', 'university', 'college', 'url', 'website', 'link')) {
-            valueToFill = data.location || '';
-        }
-
-        // Postal Code (Use AI)
+        // Postal Code (Prioritize this! Use AI)
         else if (isMatch('zip', 'postal', 'pin code', 'pincode', 'postcode', 'zipcode')) {
+            console.log('Matched POSTAL CODE rule (Queueing AI)');
             if (!input.value) {
                 input.style.border = '2px solid #FF9500';
                 input.placeholder = 'Finding postal code...';
 
-                activeInput = input;
                 const location = data.location || "the user's location";
                 const questionPrompt = `What is the postal code for the address: "${location}"? Return ONLY the code.`;
 
-                chrome.runtime.sendMessage({
-                    action: 'generate-ai-answer',
-                    question: questionPrompt,
+                aiQueue.push({
+                    input: input,
+                    prompt: questionPrompt,
                     context: "User Location: " + (data.location || "")
                 });
 
@@ -300,11 +321,88 @@ function autofillForms(data) {
             }
         }
 
+        // City (Use AI for smart extraction)
+        else if (isMatch('city', 'town') && !isMatch('university', 'college', 'school', 'employer', 'address')) {
+            console.log('Matched CITY rule (Queueing AI)');
+            if (!input.value) {
+                input.style.border = '2px solid #FF9500';
+                input.placeholder = 'Finding city...';
+
+                // Try simple split first? No, User wants "smart". Use AI.
+                const location = data.location || "the user's location";
+                const questionPrompt = `What is the city name from the location: "${location}"? Return ONLY the city name.`;
+
+                aiQueue.push({
+                    input: input,
+                    prompt: questionPrompt,
+                    context: "User Location: " + (data.location || "")
+                });
+
+                report.push({
+                    field: label || 'City',
+                    value: 'AI is finding...'
+                });
+            }
+        }
+
+        // State / Province (Use AI)
+        else if (isMatch('state', 'province', 'region', 'territory') && !isMatch('united states', 'country')) {
+            console.log('Matched STATE/PROVINCE rule (Queueing AI)');
+            if (!input.value) {
+                input.style.border = '2px solid #FF9500';
+                input.placeholder = 'Finding state...';
+
+                const location = data.location || "the user's location";
+                const questionPrompt = `What is the state/province/region for the location: "${location}"? Return ONLY the state name.`;
+
+                aiQueue.push({
+                    input: input,
+                    prompt: questionPrompt,
+                    context: "User Location: " + (data.location || "")
+                });
+
+                report.push({
+                    field: label || 'State',
+                    value: 'AI is finding...'
+                });
+            }
+        }
+
+        // Address Line 1 (Strict match)
+        else if (isMatch('address line 1', 'street address', 'address 1') || (isMatch('address') && !isMatch('line 2', 'line 3', 'unit', 'city', 'state', 'zip', 'postal', 'code', 'link', 'url', 'email', 'ip'))) {
+            // For Address Line 1, if we just have a general location (e.g. Bhopal), using it is better than nothing?
+            // Or should we leave it for the user?  "Bhopal, IP" is not a street address.
+            // Let's queue it for AI to see if it can hallucinate a generic "N/A" or extract street if present in resume.
+            console.log('Matched ADDRESS LINE 1 rule (Queueing AI)');
+            if (!input.value) {
+                input.style.border = '2px solid #FF9500';
+                input.placeholder = 'Finding street address...';
+
+                // We'll give it the full resume context in case address is there
+                aiQueue.push({
+                    input: input,
+                    prompt: `What is the street address (Line 1) for the user based on their info? If only city/state is known, suggest a proper format or return the city. User location string is: "${data.location}"`,
+                    context: document.body.innerText.substring(0, 500)
+                });
+
+                report.push({
+                    field: label || 'Address',
+                    value: 'AI is finding...'
+                });
+            }
+        }
+
+        // Location (Generic - Catch all else)
+        else if (isMatch('location', 'where are you based', 'country') &&
+            !isMatch('zip', 'postal', 'code', 'pin', 'zipcode', 'job', 'company', 'employer', 'school', 'university', 'college', 'url', 'website', 'link', 'city', 'state', 'street', 'address', 'search', 'alert')) {
+            valueToFill = data.location || '';
+            console.log('Matched GENERIC LOCATION rule');
+        }
+
         // Education
         else if (isMatch('college', 'university', 'institution', 'school', 'education')) {
             if (Array.isArray(educationList) && educationList.length > schoolIndex) {
                 valueToFill = educationList[schoolIndex].institution || '';
-                schoolIndex++;
             }
         }
 
@@ -313,20 +411,23 @@ function autofillForms(data) {
             if (Array.isArray(workExperience) && workExperience.length > jobTitleIndex) {
                 valueToFill = workExperience[jobTitleIndex].job_title || '';
                 jobTitleIndex++;
+                console.log('Matched JOB TITLE rule');
             }
         }
 
         // Company
-        else if (isMatch('company', 'employer', 'current organization') && !isMatch('summary', 'description')) {
+        else if (isMatch('company', 'employer', 'current organization') && !isMatch('summary', 'description', 'why', 'interest', 'about', 'working', 'choose', 'website')) {
             if (Array.isArray(workExperience) && workExperience.length > companyIndex) {
                 valueToFill = workExperience[companyIndex].company || '';
                 companyIndex++;
+                console.log('Matched COMPANY rule');
             }
         }
 
         // Smart AI Fields
         else if (isMatch('salary', 'expected', 'notice', 'experience', 'years', 'availability', 'gender', 'race', 'ethnicity', 'veteran', 'disability', 'citizenship', 'authorization', 'sponsorship')) {
             // ... existing AI logic
+            console.log('Matched SMART AI FIELD rule (salary, gender, etc)');
             if (!input.value) {
                 input.style.border = '2px solid #FFCC00';
                 input.placeholder = 'Queued for AI...';
@@ -346,6 +447,7 @@ function autofillForms(data) {
             (input.tagName === 'INPUT' && input.type === 'text' &&
                 isMatch('why', 'describe', 'tell', 'what', 'how', 'summary', 'about', 'cover'))) {
 
+            console.log('Matched GENERIC AI FIELD rule');
             if (!input.value) {
                 input.style.border = '2px solid #FFCC00';
                 input.placeholder = 'Queued for AI...';
@@ -359,24 +461,38 @@ function autofillForms(data) {
                     value: 'Queued...'
                 });
             }
+        } else {
+            console.log('NO MATCH FOUND for this input.');
         }
 
         if (valueToFill) {
             console.log(`MATCH FOUND: Filling "${valueToFill}" into ${name} (${label})`);
 
-            // Try standard value set first for visual feedback
-            input.value = valueToFill;
-            input.style.backgroundColor = '#e6fffa';
-            input.style.border = '2px solid #10b981';
+            // Check for SELECT/Dropdown
+            if (input.tagName === 'SELECT') {
+                const bestIndex = findBestOption(input, valueToFill);
+                if (bestIndex !== -1) {
+                    input.selectedIndex = bestIndex;
+                    console.log(`DROPDOWN MATCH: Selected index ${bestIndex} ("${input.options[bestIndex].text}")`);
+                    input.dispatchEvent(new Event('change', { bubbles: true }));
+                    input.dispatchEvent(new Event('input', { bubbles: true }));
+                } else {
+                    console.log(`DROPDOWN NO MATCH: Could not find option for "${valueToFill}"`);
+                }
+            } else {
+                // Standard Text Input / Textarea
+                input.value = valueToFill;
+                input.style.backgroundColor = '#e6fffa';
+                input.style.border = '2px solid #10b981';
 
-            // Then try React/Native setter
-            try {
-                setNativeValue(input, valueToFill);
-            } catch (e) {
-                console.error("Failed to set native value:", e);
-                // Fallback to dispatching events on input
-                input.dispatchEvent(new Event('input', { bubbles: true }));
-                input.dispatchEvent(new Event('change', { bubbles: true }));
+                try {
+                    setNativeValue(input, valueToFill);
+                } catch (e) {
+                    console.error("Failed to set native value:", e);
+                    // Fallback to dispatching events on input
+                    input.dispatchEvent(new Event('input', { bubbles: true }));
+                    input.dispatchEvent(new Event('change', { bubbles: true }));
+                }
             }
 
             report.push({

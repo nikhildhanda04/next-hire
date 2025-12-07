@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { prisma } from '@/lib/prisma';
-import { getGeminiService } from '@/app/api/services/gemini-service';
+import { getAIService } from '@/app/api/services/ai-service';
 import { buildSmartAutofillPrompt } from '@/app/api/utils/prompt-builders';
 import { z } from 'zod';
 import { rateLimit } from '@/lib/rate-limit';
@@ -51,10 +51,10 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Resume not found. Please upload a resume first.' }, { status: 404 });
         }
 
-        const gemini = getGeminiService();
+        const aiService = getAIService();
         const prompt = buildSmartAutofillPrompt(question, user.resumeText, user.name || 'Candidate', context);
 
-        const streamResult = await gemini.generateContentStream(prompt);
+        const streamResult = await aiService.generateContentStream(prompt);
 
         const encoder = new TextEncoder();
         const readable = new ReadableStream({
@@ -78,8 +78,21 @@ export async function POST(request: NextRequest) {
             },
         });
 
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error generating autofill answer:', error);
+
+        // Handle Google API Rate Limiting (429)
+        if (
+            error.message?.includes('429') ||
+            error.status === 429 ||
+            JSON.stringify(error).includes('Too Many Requests')
+        ) {
+            return NextResponse.json(
+                { error: 'Daily AI usage limit reached (Free Tier). Please try again tomorrow or upgrade your plan.' },
+                { status: 429 }
+            );
+        }
+
         return NextResponse.json(
             { error: 'Internal Server Error' },
             { status: 500 }

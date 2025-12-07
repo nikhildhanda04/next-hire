@@ -29,6 +29,16 @@ export async function GET(_request: NextRequest) {
                 resumeText: true,
                 experience: true,
                 education: true,
+                // New fields
+                preferredName: true,
+                gender: true,
+                race: true,
+                veteran: true,
+                disability: true,
+                citizenship: true,
+                workAuth: true,
+                salary: true,
+                noticePeriod: true,
             }
         });
 
@@ -57,7 +67,10 @@ export async function PUT(request: NextRequest) {
         }
 
         const body = await request.json();
-        const { name, phone, location, linkedin, github, portfolio, summary } = body;
+        const {
+            name, phone, location, linkedin, github, portfolio, summary,
+            preferredName, gender, race, veteran, disability, citizenship, workAuth, salary, noticePeriod
+        } = body;
 
         // Update user profile
         const updatedUser = await prisma.user.update({
@@ -70,6 +83,15 @@ export async function PUT(request: NextRequest) {
                 github,
                 portfolio,
                 resumeText: summary ? summary : undefined,
+                preferredName,
+                gender,
+                race,
+                veteran,
+                disability,
+                citizenship,
+                workAuth,
+                salary,
+                noticePeriod,
             }
         });
 

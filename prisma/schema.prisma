@@ -33,6 +33,18 @@ model User {
   experience    Json?     // Structured experience data
   education     Json?     // Structured education data
   
+  // Extended Profile (EEO & Preferences)
+  preferredName String?
+  gender        String?
+  race          String?
+  veteran       String?
+  disability    String?
+  citizenship   String?
+  workAuth      String?
+  clearance     String?
+  salary        String?
+  noticePeriod  String?
+
   applications  JobApplication[]
 }
 

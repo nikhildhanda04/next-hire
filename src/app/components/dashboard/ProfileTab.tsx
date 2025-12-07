@@ -24,7 +24,18 @@ export default function ProfileTab({ resumeData }: ProfileTabProps) {
         linkedin: resumeData?.linkedin_url || '',
         github: resumeData?.github_url || '',
         portfolio: resumeData?.portfolio_url || '',
-        summary: resumeData?.summary || ''
+        summary: resumeData?.summary || '',
+        // New fields
+        preferredName: (resumeData as any)?.preferredName || '',
+        gender: (resumeData as any)?.gender || '',
+        race: (resumeData as any)?.race || '',
+        veteran: (resumeData as any)?.veteran || '',
+        disability: (resumeData as any)?.disability || '',
+        citizenship: (resumeData as any)?.citizenship || '',
+        workAuth: (resumeData as any)?.workAuth || '',
+        clearance: (resumeData as any)?.clearance || '',
+        salary: (resumeData as any)?.salary || '',
+        noticePeriod: (resumeData as any)?.noticePeriod || ''
     });
 
     const setResumeData = useResumeStore((state) => state.setResumeData);
@@ -56,7 +67,17 @@ export default function ProfileTab({ resumeData }: ProfileTabProps) {
                     linkedin_url: formData.linkedin,
                     github_url: formData.github,
                     portfolio_url: formData.portfolio,
-                    summary: formData.summary
+                    summary: formData.summary,
+                    preferredName: formData.preferredName,
+                    gender: formData.gender,
+                    race: formData.race,
+                    veteran: formData.veteran,
+                    disability: formData.disability,
+                    citizenship: formData.citizenship,
+                    workAuth: formData.workAuth,
+                    clearance: formData.clearance,
+                    salary: formData.salary,
+                    noticePeriod: formData.noticePeriod
                 };
                 setResumeData(updatedData);
                 alert('Profile updated successfully!');
@@ -120,6 +141,52 @@ export default function ProfileTab({ resumeData }: ProfileTabProps) {
                             <div className="relative">
                                 <Globe className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                                 <Input name="portfolio" value={formData.portfolio} onChange={handleChange} className="pl-9" placeholder="Portfolio URL" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="space-y-2 pt-2">
+                        <Label>Demographics & Preferences (For Auto-Fill)</Label>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="preferredName">Preferred Name</Label>
+                                <Input id="preferredName" name="preferredName" value={formData.preferredName} onChange={handleChange} placeholder="e.g. Nick" />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="gender">Gender</Label>
+                                <Input id="gender" name="gender" value={formData.gender} onChange={handleChange} placeholder="e.g. Male/Female/Non-binary" />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="race">Race / Ethnicity</Label>
+                                <Input id="race" name="race" value={formData.race} onChange={handleChange} placeholder="e.g. Asian" />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="veteran">Veteran Status</Label>
+                                <Input id="veteran" name="veteran" value={formData.veteran} onChange={handleChange} placeholder="e.g. No" />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="disability">Disability Status</Label>
+                                <Input id="disability" name="disability" value={formData.disability} onChange={handleChange} placeholder="e.g. No" />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="citizenship">Citizenship</Label>
+                                <Input id="citizenship" name="citizenship" value={formData.citizenship} onChange={handleChange} placeholder="e.g. United States" />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="workAuth">Work Authorization</Label>
+                                <Input id="workAuth" name="workAuth" value={formData.workAuth} onChange={handleChange} placeholder="e.g. Authorized to work in US" />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="clearance">Security Clearance</Label>
+                                <Input id="clearance" name="clearance" value={formData.clearance} onChange={handleChange} placeholder="e.g. None" />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="salary">Salary Expectation</Label>
+                                <Input id="salary" name="salary" value={formData.salary} onChange={handleChange} placeholder="e.g. $120,000" />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="noticePeriod">Notice Period</Label>
+                                <Input id="noticePeriod" name="noticePeriod" value={formData.noticePeriod} onChange={handleChange} placeholder="e.g. 2 weeks" />
                             </div>
                         </div>
                     </div>
