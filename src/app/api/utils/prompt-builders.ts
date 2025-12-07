@@ -101,8 +101,17 @@ export function buildSmartAutofillPrompt(
     question: string,
     resumeText: string,
     userName: string,
-    pageContext?: string
+    pageContext?: string,
+    userKnowledge?: { key: string; value: string }[]
 ): string {
+    const knowledgeContext = userKnowledge && userKnowledge.length > 0
+        ? `
+    Your Past Answers (User Memory):
+    The following are answers you have given to similar questions in the past. Use them as context and inspiration to answer the current question authentically. Adapt the tone and content to fit the current specific question, but try to maintain consistency with your past preferences and details.
+    ${userKnowledge.map(k => `- Question: "${k.key}"\n  Answer: "${k.value}"`).join('\n\n')}
+    `
+        : '';
+
     return `
     You are ${userName}. You are filling out a job application.
     
@@ -112,9 +121,12 @@ export function buildSmartAutofillPrompt(
     Your Resume:
     "${resumeText}"
 
+    ${knowledgeContext}
+
     Question: "${question}"
 
-    Task: Write a professional, concise, and tailored answer to the question based on your resume and the job context provided.
+    Task: Write a professional, concise, and tailored answer to the question based on your resume, your past answers (User Memory), and the job context provided.
+    If the question asks for a specific preference (e.g. Visa sponsorship, location) and you have a past answer for it, prioritize that.
     Tailor your answer to the company/job description if possible.
     Do not include any introductory text like "Here is an answer". Just provide the answer text directly.
     keep it short and crisp.

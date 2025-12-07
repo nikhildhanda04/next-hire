@@ -46,6 +46,19 @@ model User {
   noticePeriod  String?
 
   applications  JobApplication[]
+  knowledge     UserKnowledge[]
+}
+
+model UserKnowledge {
+  id        String   @id @default(cuid())
+  userId    String
+  key       String   // The question or context label
+  value     String   // The user's manual answer
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model Session {

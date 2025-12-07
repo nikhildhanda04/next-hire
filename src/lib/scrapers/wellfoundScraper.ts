@@ -5,19 +5,38 @@ export async function scrapeWellfoundJobs(): Promise<Job[]> {
     const browser = await getBrowser();
     const page = await createPage(browser);
 
+    // Set headers to mimic a real user
+    await page.setExtraHTTPHeaders({
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Referer': 'https://google.com',
+        'Cache-Control': 'no-cache',
+    });
+
     try {
         // Go to Wellfound jobs page filtered for interns
         await page.goto('https://wellfound.com/jobs?roles=Intern', {
-            waitUntil: 'networkidle0',
+            waitUntil: 'domcontentloaded', // We relax this to avoid network idle timeouts
             timeout: 60000,
         });
 
-        // Wellfound might require login or show a limited view.
-        // We'll try to scrape what's visible.
-
-        // Wait for job listings
+        // Add a small delay to allow dynamic content to start loading or key checks
         try {
-            await page.waitForSelector('[data-test="JobListItem"]', { timeout: 10000 });
+            await page.waitForSelector('[data-test="JobListItem"]', { timeout: 30000 });
+        } catch (e) {
+            console.log('Primary selector wait timed out, attempting extraction anyway...');
+            // Save HTML for debugging
+            const fs = await import('fs');
+            const content = await page.content();
+            fs.writeFileSync('debug-wellfound.html', content);
+            console.log('Saved debug-wellfound.html');
+        }
+
+        // Wait for job listings (second check, maybe redundant but safe)
+        try {
+            // We already waited above, but let's keep a short check or skip if we are sure it failed
+            if (!await page.$('[data-test="JobListItem"]')) {
+                throw new Error('Selector not found after initial wait');
+            }
         } catch {
             console.log('Timeout waiting for Wellfound selectors, might be blocked or empty');
             return [];

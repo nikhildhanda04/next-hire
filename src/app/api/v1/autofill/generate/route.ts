@@ -41,10 +41,18 @@ export async function POST(request: NextRequest) {
 
         const { question, context } = validation.data;
 
-        // Fetch latest user data (resume)
+        // Fetch latest user data (resume + knowledge)
         const user = await prisma.user.findUnique({
             where: { id: session.user.id },
-            select: { resumeText: true, name: true }
+            select: {
+                resumeText: true,
+                name: true,
+                knowledge: {
+                    orderBy: { createdAt: 'desc' },
+                    take: 20 // Take the last 20 answers to avoid token limit, or maybe filter?
+                    // Ideally we'd do vector search here, but for now exact/recent memory is a good start.
+                }
+            }
         });
 
         if (!user || !user.resumeText) {
@@ -52,7 +60,13 @@ export async function POST(request: NextRequest) {
         }
 
         const geminiService = getGeminiService();
-        const prompt = buildSmartAutofillPrompt(question, user.resumeText, user.name || 'Candidate', context);
+        const prompt = buildSmartAutofillPrompt(
+            question,
+            user.resumeText,
+            user.name || 'Candidate',
+            context,
+            user.knowledge
+        );
 
         const streamResult = await geminiService.generateContentStream(prompt);
 
