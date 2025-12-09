@@ -9,25 +9,25 @@ class GeminiService {
     constructor() {
         const apiKey = process.env.GOOGLE_API_KEY;
         if (!apiKey) {
-            const errorMessage = 'GOOGLE_API_KEY environment variable is missing! Please ensure GOOGLE_API_KEY is set in your environment variables.';
+            const errorMessage = 'GOOGLE_API_KEY environment variable is missing!';
             console.error(errorMessage);
             throw new Error(errorMessage);
         }
-        if (apiKey.length < 20) {
-            console.warn('GOOGLE_API_KEY seems too short. Please verify it\'s correct.');
-        }
+        
         this.genAI = new GoogleGenerativeAI(apiKey);
 
-        // Primary: gemini-2.5-flash (Standard Flash model from your list)
-        // Liter versions often have lower quotas. Standard Flash usually has higher throughput.
+        // Primary: Gemini 2.5 Flash (Best performance, higher quota)
         const modelName = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
         this.baseModel = this.genAI.getGenerativeModel({ model: modelName });
 
-        // Fallback: gemini-2.0-flash-001 (Explicit version, fallback)
-        this.fallbackModel = this.genAI.getGenerativeModel({ model: 'gemini-2.0-flash-001' });
+        // Fallback: Gemini 2.5 Flash-Lite (Lighter, separate quota pool)
+        // This is from the 2.5 family but "lite" version has different limits
+        this.fallbackModel = this.genAI.getGenerativeModel({ 
+            model: 'gemini-2.5-flash-lite' 
+        });
 
         if (process.env.NODE_ENV === 'development') {
-            console.log(`Using Gemini model: ${modelName} (Fallback: gemini-2.0-flash-001)`);
+            console.log(`Using Gemini model: ${modelName} (Fallback: gemini-2.5-flash-lite)`);
         }
     }
 
@@ -45,7 +45,7 @@ class GeminiService {
                     return await operation(this.fallbackModel);
                 } catch (fallbackError) {
                     console.error(`${operationName} fallback also failed.`);
-                    throw fallbackError; // Throw the original or new error? Usually new.
+                    throw fallbackError;
                 }
             }
             throw error;
@@ -57,7 +57,7 @@ class GeminiService {
             let result;
             if (options?.responseMimeType === 'application/json') {
                 const jsonModel = this.genAI.getGenerativeModel({
-                    model: model.model, // Use current model name
+                    model: model.model,
                     generationConfig: { responseMimeType: 'application/json' },
                 });
                 result = await jsonModel.generateContent(prompt);
@@ -97,4 +97,3 @@ export function getGeminiService(): GeminiService {
     }
     return geminiServiceInstance;
 }
-
