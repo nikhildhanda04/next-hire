@@ -67,7 +67,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 });
             });
 
-        return true; // Keep channel open (though we use tabs.sendMessage now)
+        return true; 
     }
 });
 
