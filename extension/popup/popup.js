@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
             autofillBtn.innerHTML = '<span>Login to Next Hire</span>';
             autofillBtn.disabled = false;
             autofillBtn.onclick = () => {
-                chrome.tabs.create({ url: 'http://localhost:3000' });
+                chrome.runtime.sendMessage({ action: 'open-dashboard' });
             };
         }
     });

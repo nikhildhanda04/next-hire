@@ -67,7 +67,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 });
             });
 
-        return true; 
+        return true;
+    }
+
+    if (request.action === 'open-dashboard') {
+        chrome.tabs.create({ url: API_BASE_URL });
+        return true;
     }
 });
 
