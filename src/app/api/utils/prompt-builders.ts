@@ -134,5 +134,6 @@ export function buildSmartAutofillPrompt(
     2. **NEVER** mention a different company name from your past answers. If the memory says "I love Google" but the current job is "Microsoft", you must write "I love Microsoft" (or the equivalent reason).
     3. If the question asks for a specific preference (e.g. Visa sponsorship, location) and you have a past answer for it, prioritize that preference but ensure the phrasing is fresh.
     4. Keep it short and crisp. Start directly with the answer.
+    5. If the question asks for a "message", "note", or "cover letter" for the employer, write a professional, 2-3 sentence introduction expressing enthusiasm for the role and company. Do NOT output random keywords.
     `;
 }

@@ -1,4 +1,4 @@
-// Gemini AI Service
+
 import { GoogleGenerativeAI, GenerativeModel } from '@google/generative-ai';
 
 class GeminiService {
@@ -13,17 +13,14 @@ class GeminiService {
             console.error(errorMessage);
             throw new Error(errorMessage);
         }
-        
+
         this.genAI = new GoogleGenerativeAI(apiKey);
 
-        // Primary: Gemini 2.5 Flash (Best performance, higher quota)
         const modelName = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
         this.baseModel = this.genAI.getGenerativeModel({ model: modelName });
 
-        // Fallback: Gemini 2.5 Flash-Lite (Lighter, separate quota pool)
-        // This is from the 2.5 family but "lite" version has different limits
-        this.fallbackModel = this.genAI.getGenerativeModel({ 
-            model: 'gemini-2.5-flash-lite' 
+        this.fallbackModel = this.genAI.getGenerativeModel({
+            model: 'gemini-2.5-flash-lite'
         });
 
         if (process.env.NODE_ENV === 'development') {
@@ -38,7 +35,6 @@ class GeminiService {
         try {
             return await operation(this.baseModel);
         } catch (error: any) {
-            // Check for Rate Limit (429) or Overloaded (503)
             if (error.status === 429 || error.status === 503 || error.message?.includes('429')) {
                 console.warn(`${operationName} failed with ${error.status}. Switching to fallback model...`);
                 try {
@@ -78,7 +74,6 @@ class GeminiService {
     }
 }
 
-// Singleton instance
 let geminiServiceInstance: GeminiService | null = null;
 let initializationError: Error | null = null;
 

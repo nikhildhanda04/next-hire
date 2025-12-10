@@ -416,7 +416,7 @@ function autofillForms(data) {
         }
 
         // Company
-        else if (isMatch('company', 'employer', 'current organization') && !isMatch('summary', 'description', 'why', 'interest', 'about', 'working', 'choose', 'website')) {
+        else if (isMatch('company', 'employer', 'current organization') && !isMatch('summary', 'description', 'why', 'interest', 'about', 'working', 'choose', 'website', 'message', 'note')) {
             if (Array.isArray(workExperience) && workExperience.length > companyIndex) {
                 valueToFill = workExperience[companyIndex].company || '';
                 companyIndex++;
@@ -445,7 +445,7 @@ function autofillForms(data) {
         // TextArea / Open-ended
         else if (input.tagName === 'TEXTAREA' ||
             (input.tagName === 'INPUT' && input.type === 'text' &&
-                isMatch('why', 'describe', 'tell', 'what', 'how', 'summary', 'about', 'cover'))) {
+                isMatch('why', 'describe', 'tell', 'what', 'how', 'summary', 'about', 'cover', 'message', 'note'))) {
 
             console.log('Matched GENERIC AI FIELD rule');
             if (!input.value) {
