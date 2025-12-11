@@ -1,12 +1,11 @@
-// frontend\src\app\components\landingpage\hero.tsx
+
 'use client';
 
-import { Bookmark, Sun, Moon, Loader2 } from 'lucide-react';
+import { Bookmark, Loader2, Sun, Moon } from 'lucide-react';
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useResumeStore } from '@/app/store/resumeStore';
 
-// This component is the main interactive element of the landing page.
 export default function Hero() {
     // State Management
     const [isDark, setIsDark] = useState(false);
@@ -136,8 +135,28 @@ export default function Hero() {
         }
     };
 
+    // Typing animation state
+    const [typedText, setTypedText] = useState("");
+    const fullText = "This field is being filled by Next Hire AI...";
+
+    useEffect(() => {
+        let index = 0;
+        const timer = setInterval(() => {
+            setTypedText((prev) => {
+                if (index < fullText.length) {
+                    index++;
+                    return fullText.slice(0, index);
+                }
+                return prev;
+            });
+        }, 50);
+
+        return () => clearInterval(timer);
+    }, []);
+
     return (
-        <div className="relative flex flex-col items-center gap-20 justify-center pt-12 md:pt-36 h-screen w-full">
+        <div className="relative flex flex-col items-center justify-start pt-44 min-h-screen w-full overflow-hidden">
+            {/* Background Grid */}
             <div
                 className="absolute inset-0 pointer-events-none"
                 style={{
@@ -148,56 +167,110 @@ export default function Hero() {
             >
                 <div className={`w-full h-full ${isDark ? 'bg-grid-white' : 'bg-grid-black'}`} />
             </div>
-            <div className="relative flex flex-col items-center gap-6 md:gap-8 z-10">
-                <div className="flex flex-row items-center">
-                    <div className="hidden px-4 py-3 rounded-full items-center md:flex text-center font-secondary text-xs md:text-l text-dark dark:text-light hover:bg-red-600 hover:text-light transition-all duration-200 ease-in-out border-2 border-red-600 bg-blur-2xl">
-                        {isDark ? (
-                            <Bookmark className="inline mr-2 w-3 md:w-6 h-auto" stroke="#FFFFF8" fill="#FFFFF8" />
-                        ) : (
-                            <Bookmark className="inline mr-2 w-3 md:w-6 h-auto" stroke="#121212" fill="#121212" />
-                        )}
-                        find your dream job
+
+            {/* Main Content */}
+            <div className="relative flex flex-col items-center gap-6 z-10 w-full max-w-6xl px-4">
+
+                {/* Heading Section */}
+                <div className="flex flex-col items-center text-center gap-4">
+                    <div className="hidden px-4 py-2 rounded-full items-center md:flex text-center font-secondary text-xs md:text-sm text-dark dark:text-light border border-stone-200 dark:border-stone-700 bg-white/50 dark:bg-black/50 backdrop-blur-sm mb-2">
+                        <Bookmark className="inline mr-2 w-3 md:w-4 h-auto" />
+                        Find your dream job faster
                     </div>
-                    <button
-                        className="bg-neutral-800 rounded-full p-3 ml-4 hidden md:flex items-center justify-center transition-colors duration-200"
-                        onClick={toggleTheme}
-                        aria-label="Toggle dark mode"
-                        type="button"
-                    >
-                        {isDark ? (
-                            <Sun className="inline" size={28} color="#FFFFF8" />
-                        ) : (
-                            <Moon className="inline" size={28} color="#FFFFF8" />
-                        )}
-                    </button>
+
+                    <h1 className="font-primary text-5xl md:text-7xl uppercase text-dark dark:text-light transition-colors duration-200 tracking-tight leading-none">
+                        Upload. Match. <span className="text-primary">Succeed.</span>
+                    </h1>
+                    <p className="font-secondary text-base md:text-xl text-stone-500 dark:text-stone-400 max-w-2xl">
+                        Stop copy-pasting. Let our AI analyze your resume and autofill applications with tailored answers.
+                    </p>
+
+                    {/* CTA Button */}
+                    <div className="mt-4">
+                        <input
+                            type="file"
+                            ref={fileInputRef}
+                            onChange={handleFileChange}
+                            className="hidden"
+                            accept=".pdf,.docx"
+                        />
+                        <button
+                            onClick={handleUploadClick}
+                            disabled={isLoading}
+                            className="font-secondary text-lg bg-primary text-light px-8 py-4 rounded-full shadow-lg hover:shadow-xl hover:bg-primary/90 transition-all duration-300 flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed group"
+                        >
+                            {isLoading ? (
+                                <>
+                                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                                    Analyzing Resume...
+                                </>
+                            ) : (
+                                <>
+                                    Upload Resume
+                                    <Bookmark className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                </>
+                            )}
+                        </button>
+                    </div>
                 </div>
-                <div className="font-primary text-4xl md:text-6xl uppercase px-8 text-center text-dark dark:text-light transition-colors duration-200">
-                    Upload. Match. Succeed
+
+                {/* Dashboard Simulation Visuals */}
+                <div className="relative top-10 w-full mt-16 md:mt-24 perspective-distant">
+
+                    {/* Main Dashboard Rectangle */}
+                    <div className="w-full max-w-4xl mx-auto h-[400px] md:h-[500px] bg-white dark:bg-neutral-900 rounded-xl border border-stone-200 dark:border-stone-800 shadow-2xl overflow-hidden relative z-0 md:rotate-x-2 transition-transform duration-700">
+                        {/* Mockup Header */}
+                        <div className="h-10 border-b border-stone-200 dark:border-stone-800 flex items-center px-4 gap-2 bg-stone-50 dark:bg-stone-900/50">
+                            <div className="w-3 h-3 rounded-full bg-red-400"></div>
+                            <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
+                            <div className="w-3 h-3 rounded-full bg-green-400"></div>
+                        </div>
+                        {/* Mockup Body - Abstract Blocks */}
+                        <div className="p-6 flex gap-6 h-full">
+                            <div className="w-1/4 h-3/4 bg-stone-100 dark:bg-stone-800 rounded-lg animate-pulse" style={{ animationDuration: '5s' }}></div>
+                            <div className="flex-1 flex flex-col gap-4 animate-pulse duration-600">
+                                <div className="h-32 bg-stone-100 dark:bg-stone-800 rounded-lg"></div>
+                                <div className="h-32 bg-stone-100 dark:bg-stone-800 rounded-lg opacity-60"></div>
+                                <div className="h-32 bg-stone-100 dark:bg-stone-800 rounded-lg opacity-40"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Floating Extension Box (Left) */}
+                    <div className="absolute top-20 left-4 md:-left-4 z-30 md:top-32 w-48 md:w-64 bg-white dark:bg-neutral-800 rounded-lg border border-stone-200 dark:border-stone-700 shadow-[0_20px_50px_rgba(0,0,0,0.2)] p-4 hidden md:block animate-float">
+                        <div className="flex items-center gap-3 mb-3">
+                            <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+                                <Bookmark className="w-4 h-4 text-primary" />
+                            </div>
+                            <div className="text-sm font-semibold text-dark dark:text-light">Next Hire AI</div>
+                        </div>
+                        <div className="space-y-2">
+                            <div className="h-2 w-3/4 bg-stone-100 dark:bg-stone-700 rounded full" />
+                            <div className="h-2 w-1/2 bg-stone-100 dark:bg-stone-700 rounded full" />
+                            <div className="mt-4 px-3 py-1.5 bg-primary text-white text-xs rounded text-center">Autofill Profile</div>
+                        </div>
+                    </div>
+
+                    {/* Floating Input Box (Right/Center) */}
+                    <div className="absolute top-10 right-4 md:right-20 md:-top-12 w-64 md:w-80 bg-white dark:bg-neutral-800 rounded-lg border border-primary ring-4 ring-primary/10 shadow-[0_20px_50px_rgba(0,0,0,0.3)] p-4 z-10 transition-all duration-300 hover:scale-105">
+                        <label className="text-xs font-semibold text-stone-500 uppercase mb-1 block">Why do you want this job?</label>
+                        <div className="font-mono text-sm text-dark dark:text-light border-l-2 border-primary pl-2 h-16 overflow-hidden">
+                            {typedText}
+                            <span className="animate-pulse">|</span>
+                        </div>
+                    </div>
+
+                    {/* Curved Arrow */}
+                    <svg className="absolute w-64 h-32 top-20 left-32 md:w-[580px] z-20 md:h-48 md:top-0 md:left-48 pointer-events-none hidden md:block text-primary" viewBox="0 0 600 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M 0,200 C 400,180 300,30 550,10" stroke="currentColor" strokeWidth="2" strokeDasharray="4 4" markerEnd="url(#arrowhead)" className="animate-dash" />
+                        <defs>
+                            <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                                <polygon points="0 0, 10 3.5, 0 7" fill="currentColor" />
+                            </marker>
+                        </defs>
+                    </svg>
+
                 </div>
-                <div className="font-secondary text-sm md:text-l px-8 text-center text-stone-500 md:mt-3 transition-colors duration-200">
-                    AI powered job search, let AI help find perfect job roles for you
-                </div>
-                <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleFileChange}
-                    className="hidden"
-                    accept=".pdf,.docx"
-                />
-                <button
-                    onClick={handleUploadClick}
-                    disabled={isLoading}
-                    className="font-secondary text-xs md:text-lg bg-primary text-light px-7 py-3 rounded-full shadow-[0_6px_10px_rgba(0,0,0,0.15)] dark:shadow-[0_6px_30px_rgba(255,255,248,0.2)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.25)] dark:hover:shadow-[0_8px_40px_rgba(255,255,248,0.3)] hover:bg-primary/[0.98] transition-all duration-300 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                    {isLoading ? (
-                        <>
-                            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                            Analyzing...
-                        </>
-                    ) : (
-                        'Upload Resume'
-                    )}
-                </button>
             </div>
         </div>
     );
