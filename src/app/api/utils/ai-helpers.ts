@@ -1,4 +1,3 @@
-// AI helper functions for resume parsing and ATS analysis
 
 import { getGeminiService } from '../services/gemini-service';
 import { extractJsonFromResponse } from './json-parser';
@@ -11,7 +10,6 @@ import {
 } from './prompt-builders';
 import { ResumeOutput, ATSAnalysisOutput, RewriteSuggestion } from '../types';
 
-// Parse resume with AI
 export async function parseResumeWithAI(resumeText: string): Promise<ResumeOutput> {
     const geminiService = getGeminiService();
     const prompt = buildResumeParsePrompt(resumeText);
@@ -21,12 +19,11 @@ export async function parseResumeWithAI(resumeText: string): Promise<ResumeOutpu
             responseMimeType: 'application/json',
         });
 
-        // Try to parse as JSON directly first (in case responseMimeType worked)
         try {
             const directParse = JSON.parse(responseText);
             return directParse as ResumeOutput;
         } catch {
-            // If direct parse fails, use the extractor
+      
             return extractJsonFromResponse(responseText) as ResumeOutput;
         }
     } catch (error) {
@@ -42,7 +39,6 @@ export async function parseResumeWithAI(resumeText: string): Promise<ResumeOutpu
     }
 }
 
-// Stage 1: Identify improvable bullets
 async function identifyImprovableBullets(resumeText: string, context: string): Promise<string[]> {
     const geminiService = getGeminiService();
     const prompt = buildImprovableBulletsPrompt(resumeText, context);
@@ -59,7 +55,6 @@ async function identifyImprovableBullets(resumeText: string, context: string): P
     }
 }
 
-// Stage 2: Refine a single bullet point
 async function refineBulletPoint(bullet: string, context: string): Promise<string> {
     const geminiService = getGeminiService();
     const prompt = buildRefineBulletPrompt(bullet, context);
@@ -73,7 +68,6 @@ async function refineBulletPoint(bullet: string, context: string): Promise<strin
     }
 }
 
-// Analyze ATS with AI
 export async function analyzeATSWithAI(
     resumeText: string,
     jobDescription?: string | null,
@@ -108,18 +102,14 @@ export async function analyzeATSWithAI(
         });
         const analysisData = extractJsonFromResponse(responseText) as unknown as ATSAnalysisOutput;
 
-        // Run the two-stage pipeline with randomization
         const bulletPool = await identifyImprovableBullets(resumeText, analysisContext);
 
-        // Determine how many bullets to select (up to 3)
         const numToSelect = Math.min(bulletPool.length, 3);
 
-        // Randomly select bullets from the pool
         const selectedBullets: string[] = [];
         const shuffled = [...bulletPool].sort(() => 0.5 - Math.random());
         selectedBullets.push(...shuffled.slice(0, numToSelect));
 
-        // Stage 2: Refine each randomly selected bullet
         const rewriteSuggestions: RewriteSuggestion[] = [];
         for (const bullet of selectedBullets) {
             if (bullet) {

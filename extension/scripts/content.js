@@ -30,7 +30,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
         try {
             const report = autofillForms(data);
-            processQueue(); // Start queue if any
+            processQueue(); 
             sendResponse({ success: true, report: report });
         } catch (e) {
             console.error(e);
@@ -38,20 +38,19 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         }
     }
 
-    // Stream Handlers
     if (request.action === 'ai-stream-chunk' && activeInput) {
         activeInput.value += request.chunk;
-        // Trigger events for reactive forms
+       
         activeInput.dispatchEvent(new Event('input', { bubbles: true }));
     }
 
     if (request.action === 'ai-stream-complete' && activeInput) {
-        activeInput.style.border = '2px solid #10b981'; // Green
+        activeInput.style.border = '2px solid #10b981'; 
         activeInput.style.backgroundColor = '#ecfdf5';
         activeInput.dispatchEvent(new Event('change', { bubbles: true })); // Final change
         activeInput = null;
 
-        // Trigger next item in queue
+    
         isProcessingQueue = false;
         setTimeout(processQueue, 500);
     }
@@ -61,25 +60,21 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         activeInput.placeholder = 'Error: ' + request.error;
         activeInput = null;
 
-        // Trigger next item even if error
         isProcessingQueue = false;
         setTimeout(processQueue, 500);
     }
 });
 
-// Helper function to find label or related text
 function findLabel(input) {
-    // 1. Check strict <label for="id">
+  
     if (input.id) {
         const label = document.querySelector(`label[for="${input.id}"]`);
         if (label) return label.innerText;
     }
 
-    // 2. Check parent <label>
     const parentLabel = input.closest('label');
     if (parentLabel) return parentLabel.innerText;
 
-    // 3. Check aria-label or aria-labelledby
     const ariaLabel = input.getAttribute('aria-label');
     if (ariaLabel) return ariaLabel;
 
@@ -89,24 +84,19 @@ function findLabel(input) {
         if (labelElement) return labelElement.innerText;
     }
 
-    // 4. Check preceding sibling (common in React/Tailwind forms)
-    // Often <div class="label">Text</div><input>
     let sibling = input.previousElementSibling;
     while (sibling) {
         if (sibling.tagName === 'LABEL' || sibling.tagName === 'DIV' || sibling.tagName === 'SPAN' || sibling.tagName === 'P') {
-            // Heuristic: Check if text length is reasonable for a label (< 50 chars)
+           
             if (sibling.innerText && sibling.innerText.length > 0 && sibling.innerText.length < 50) {
                 return sibling.innerText;
             }
         }
         sibling = sibling.previousElementSibling;
 
-        // Don't look too far back
         if (!sibling) break;
     }
 
-    // 5. Check parent's previous sibling (wrapped input case)
-    // <div><label>Text</label><div><input></div></div>
     const parent = input.parentElement;
     if (parent) {
         let parentSibling = parent.previousElementSibling;
@@ -124,31 +114,26 @@ function autofillForms(data) {
     const inputs = document.querySelectorAll('input, textarea, select');
     const report = [];
 
-    // indices for repetitive fields
     let schoolIndex = 0;
     let jobTitleIndex = 0;
     let companyIndex = 0;
 
-    // Helper to find label or related text (Improved)
     function findLabel(input) {
-        // 1. Check strict <label for="id">
+
         if (input.id) {
             const label = document.querySelector(`label[for="${input.id}"]`);
             if (label) return label.innerText;
         }
 
-        // 2. Check parent <label>
         const parentLabel = input.closest('label');
         if (parentLabel) return parentLabel.innerText;
 
-        // 3. Check aria-label or aria-labelledby
         const ariaLabel = input.getAttribute('aria-label');
         if (ariaLabel) return ariaLabel;
 
-        // 4. Check preceding sibling (common in React/Tailwind forms)
         let sibling = input.previousElementSibling;
         let checks = 0;
-        while (sibling && checks < 3) { // Check closest 3 siblings
+        while (sibling && checks < 3) { 
             if (sibling.innerText && sibling.innerText.length > 0 && sibling.innerText.length < 100) {
                 return sibling.innerText;
             }
@@ -156,14 +141,12 @@ function autofillForms(data) {
             checks++;
         }
 
-        // 5. Check parent's previous sibling (wrapped input case)
         const parent = input.parentElement;
         if (parent) {
             let parentSibling = parent.previousElementSibling;
             if (parentSibling && parentSibling.innerText && parentSibling.innerText.length < 100) {
                 return parentSibling.innerText;
             }
-            // Go one level higher for deep nesting (common in Workday/Taleo)
             const grandParent = parent.parentElement;
             if (grandParent) {
                 const grandParentSibling = grandParent.previousElementSibling;
@@ -175,7 +158,6 @@ function autofillForms(data) {
         return '';
     }
 
-    // React-compatible value setter
     function setNativeValue(element, value) {
         const valueDescriptor = Object.getOwnPropertyDescriptor(element, 'value');
         const prototype = Object.getPrototypeOf(element);
@@ -199,12 +181,10 @@ function autofillForms(data) {
         element.dispatchEvent(new Event('change', { bubbles: true }));
     }
 
-    // Helper to finding best option in a <select>
     function findBestOption(select, text) {
         if (!text) return -1;
         const search = text.toLowerCase().trim();
 
-        // 1. Exact Match (Value or Text)
         for (let i = 0; i < select.options.length; i++) {
             const opt = select.options[i];
             const optVal = (opt.value || '').toLowerCase();
@@ -212,8 +192,6 @@ function autofillForms(data) {
             if (optVal === search || optText === search) return i;
         }
 
-        // 2. Contains Match (User data contains Option text, e.g. User="Bhopal, India", Option="India")
-        // OR Option text contains User data (User="India", Option="Republic of India")
         for (let i = 0; i < select.options.length; i++) {
             const opt = select.options[i];
             const optText = (opt.innerText || '').toLowerCase().trim();
@@ -237,7 +215,7 @@ function autofillForms(data) {
         const automationId = (input.getAttribute('data-automation-id') || '').toLowerCase(); // Workday
         const testId = (input.getAttribute('data-testid') || '').toLowerCase();
 
-        // Helper to check matches
+        
         const isMatch = (...keywords) => keywords.some(k =>
             name.includes(k) ||
             id.includes(k) ||
@@ -251,40 +229,33 @@ function autofillForms(data) {
 
         let valueToFill = null;
 
-        // Normalize arrays
         const workExperience = data.work_experience || data.experience || [];
         const educationList = data.education || [];
 
-        // Name - First Name
         if (input.tagName !== 'TEXTAREA' && isMatch('first name', 'firstname', 'given name')) {
             valueToFill = data.name ? data.name.split(' ')[0] : '';
             console.log('Matched FIRST NAME rule');
         }
-        // Name - Last Name
         else if (input.tagName !== 'TEXTAREA' && isMatch('last name', 'lastname', 'surname', 'family name')) {
             valueToFill = data.name ? data.name.split(' ').slice(1).join(' ') : '';
             console.log('Matched LAST NAME rule');
         }
-        // Name - Full Name
         else if (input.tagName !== 'TEXTAREA' && isMatch('full name', 'fullname', 'your name', 'name') &&
             !isMatch('project', 'company', 'host', 'school', 'institution', 'employer', 'message', 'cover', 'intro', 'preferred')) {
             valueToFill = data.name;
             console.log('Matched FULL NAME rule');
         }
 
-        // Email
         else if ((isMatch('email') || type === 'email' || autocomplete === 'email') && input.type !== 'file') {
             valueToFill = data.email;
             console.log('Matched EMAIL rule');
         }
 
-        // Phone
         else if (isMatch('phone', 'mobile', 'tel', 'contact number')) {
             valueToFill = data.phone || data.phone_number || '';
             console.log('Matched PHONE rule');
         }
 
-        // Links
         else if (isMatch('linkedin')) {
             valueToFill = data.linkedin_url || data.linkedin || '';
             console.log('Matched LINKEDIN rule');
@@ -298,7 +269,6 @@ function autofillForms(data) {
             console.log('Matched PORTFOLIO rule');
         }
 
-        // Postal Code (Prioritize this! Use AI)
         else if (isMatch('zip', 'postal', 'pin code', 'pincode', 'postcode', 'zipcode')) {
             console.log('Matched POSTAL CODE rule (Queueing AI)');
             if (!input.value) {
@@ -321,14 +291,12 @@ function autofillForms(data) {
             }
         }
 
-        // City (Use AI for smart extraction)
         else if (isMatch('city', 'town') && !isMatch('university', 'college', 'school', 'employer', 'address')) {
             console.log('Matched CITY rule (Queueing AI)');
             if (!input.value) {
                 input.style.border = '2px solid #FF9500';
                 input.placeholder = 'Finding city...';
 
-                // Try simple split first? No, User wants "smart". Use AI.
                 const location = data.location || "the user's location";
                 const questionPrompt = `What is the city name from the location: "${location}"? Return ONLY the city name.`;
 
@@ -345,7 +313,6 @@ function autofillForms(data) {
             }
         }
 
-        // State / Province (Use AI)
         else if (isMatch('state', 'province', 'region', 'territory') && !isMatch('united states', 'country')) {
             console.log('Matched STATE/PROVINCE rule (Queueing AI)');
             if (!input.value) {
@@ -368,17 +335,13 @@ function autofillForms(data) {
             }
         }
 
-        // Address Line 1 (Strict match)
         else if (isMatch('address line 1', 'street address', 'address 1') || (isMatch('address') && !isMatch('line 2', 'line 3', 'unit', 'city', 'state', 'zip', 'postal', 'code', 'link', 'url', 'email', 'ip'))) {
-            // For Address Line 1, if we just have a general location (e.g. Bhopal), using it is better than nothing?
-            // Or should we leave it for the user?  "Bhopal, IP" is not a street address.
-            // Let's queue it for AI to see if it can hallucinate a generic "N/A" or extract street if present in resume.
+            
             console.log('Matched ADDRESS LINE 1 rule (Queueing AI)');
             if (!input.value) {
                 input.style.border = '2px solid #FF9500';
                 input.placeholder = 'Finding street address...';
 
-                // We'll give it the full resume context in case address is there
                 aiQueue.push({
                     input: input,
                     prompt: `What is the street address (Line 1) for the user based on their info? If only city/state is known, suggest a proper format or return the city. User location string is: "${data.location}"`,
@@ -392,21 +355,18 @@ function autofillForms(data) {
             }
         }
 
-        // Location (Generic - Catch all else)
         else if (isMatch('location', 'where are you based', 'country') &&
             !isMatch('zip', 'postal', 'code', 'pin', 'zipcode', 'job', 'company', 'employer', 'school', 'university', 'college', 'url', 'website', 'link', 'city', 'state', 'street', 'address', 'search', 'alert')) {
             valueToFill = data.location || '';
             console.log('Matched GENERIC LOCATION rule');
         }
 
-        // Education
         else if (isMatch('college', 'university', 'institution', 'school', 'education')) {
             if (Array.isArray(educationList) && educationList.length > schoolIndex) {
                 valueToFill = educationList[schoolIndex].institution || '';
             }
         }
 
-        // Job Title
         else if (isMatch('job title', 'role', 'current position', 'designation')) {
             if (Array.isArray(workExperience) && workExperience.length > jobTitleIndex) {
                 valueToFill = workExperience[jobTitleIndex].job_title || '';
@@ -415,7 +375,6 @@ function autofillForms(data) {
             }
         }
 
-        // Company
         else if (isMatch('company', 'employer', 'current organization') && !isMatch('summary', 'description', 'why', 'interest', 'about', 'working', 'choose', 'website', 'message', 'note')) {
             if (Array.isArray(workExperience) && workExperience.length > companyIndex) {
                 valueToFill = workExperience[companyIndex].company || '';
@@ -424,9 +383,8 @@ function autofillForms(data) {
             }
         }
 
-        // Smart AI Fields
         else if (isMatch('salary', 'expected', 'notice', 'experience', 'years', 'availability', 'gender', 'race', 'ethnicity', 'veteran', 'disability', 'citizenship', 'authorization', 'sponsorship')) {
-            // ... existing AI logic
+          
             console.log('Matched SMART AI FIELD rule (salary, gender, etc)');
             if (!input.value) {
                 input.style.border = '2px solid #FFCC00';
@@ -442,7 +400,7 @@ function autofillForms(data) {
                 });
             }
         }
-        // TextArea / Open-ended
+
         else if (input.tagName === 'TEXTAREA' ||
             (input.tagName === 'INPUT' && input.type === 'text' &&
                 isMatch('why', 'describe', 'tell', 'what', 'how', 'summary', 'about', 'cover', 'message', 'note'))) {
@@ -468,7 +426,6 @@ function autofillForms(data) {
         if (valueToFill) {
             console.log(`MATCH FOUND: Filling "${valueToFill}" into ${name} (${label})`);
 
-            // Check for SELECT/Dropdown
             if (input.tagName === 'SELECT') {
                 const bestIndex = findBestOption(input, valueToFill);
                 if (bestIndex !== -1) {
@@ -480,7 +437,7 @@ function autofillForms(data) {
                     console.log(`DROPDOWN NO MATCH: Could not find option for "${valueToFill}"`);
                 }
             } else {
-                // Standard Text Input / Textarea
+            
                 input.value = valueToFill;
                 input.style.backgroundColor = '#e6fffa';
                 input.style.border = '2px solid #10b981';
@@ -489,7 +446,7 @@ function autofillForms(data) {
                     setNativeValue(input, valueToFill);
                 } catch (e) {
                     console.error("Failed to set native value:", e);
-                    // Fallback to dispatching events on input
+                   
                     input.dispatchEvent(new Event('input', { bubbles: true }));
                     input.dispatchEvent(new Event('change', { bubbles: true }));
                 }

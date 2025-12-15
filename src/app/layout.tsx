@@ -1,8 +1,9 @@
-// frontend\src\app\layout.tsx
+
 import type { Metadata } from "next";
 import { Geist, Poppins } from "next/font/google";
 import "./globals.css";
 
+import { Analytics } from "@vercel/analytics/react";
 import SmoothScroll from "./components/common/smooth-scroll";
 
 const geistSans = Geist({
@@ -34,7 +35,7 @@ export const metadata: Metadata = {
     siteName: "Next Hire",
     images: [
       {
-        url: 'https://next-hire-bice.vercel.app/og-image.jpg', // Make sure to add this image to public folder if possible, or use a placeholder
+        url: 'https://next-hire-bice.vercel.app/og-image.jpg',
         width: 1200,
         height: 630,
         alt: 'Next Hire Preview',
@@ -45,7 +46,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Next Hire - AI Powered Job Autofill",
     description: "Autofill job applications in seconds with Next Hire.",
-    creator: "@nikhildhanda", // Replace with actual handle if known
+    creator: "@nikhildhanda",
   },
   icons: {
     icon: "/nexthire-logo.png",
@@ -64,6 +65,7 @@ export default function RootLayout({
       >
         <SmoothScroll />
         {children}
+        <Analytics />
       </body>
     </html>
   );

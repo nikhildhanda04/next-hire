@@ -4,12 +4,10 @@ import { scrapeWellfoundJobs } from '@/lib/scrapers/wellfoundScraper';
 
 export async function GET() {
     try {
-        console.log('Starting job fetch...');
-        const ycJobs = await scrapeYCJobs();
-        console.log(`Fetched ${ycJobs.length} jobs from YC`);
 
+
+        const ycJobs = await scrapeYCJobs();
         const wellfoundJobs = await scrapeWellfoundJobs();
-        console.log(`Fetched ${wellfoundJobs.length} jobs from Wellfound`);
 
         const allJobs = [...ycJobs, ...wellfoundJobs];
 

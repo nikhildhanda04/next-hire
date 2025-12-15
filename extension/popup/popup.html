@@ -146,6 +146,56 @@
         .hidden {
             display: none !important;
         }
+
+        /* Settings are now main UI */
+        #settings-panel {
+            background: aliceblue;
+            padding: 10px;
+            border: 1px solid #eee;
+            border-radius: 6px;
+            margin-bottom: 12px;
+        }
+
+        .input-group {
+            margin-bottom: 8px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 11px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        .input-group input {
+            width: 90%;
+            padding: 6px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 11px;
+        }
+
+        .success-msg {
+            color: var(--success);
+            font-size: 11px;
+            text-align: center;
+            margin-top: 5px;
+        }
+
+        .btn-small {
+            width: 100%;
+            padding: 8px;
+            background-color: #333;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .btn-small:hover {
+            background-color: #000;
+        }
     </style>
 </head>
 
@@ -165,6 +215,17 @@
                 <div class="status-dot active"></div>
                 <span id="user-name">User</span>
             </div>
+        </div>
+
+        <div id="settings-panel">
+            <div style="font-size: 12px; font-weight: 600; margin-bottom: 8px;">Configure AI Access</div>
+            <div class="input-group">
+                <input type="password" id="api-key-input" placeholder="Paste your Gemini or OpenAI Key here">
+            </div>
+            <button id="save-settings-btn" class="btn-small">Save AI Key</button>
+            <p id="save-msg" class="success-msg hidden">Keys Saved!</p>
+            <p id="key-error-msg" style="color: #ef4444; font-size: 11px; margin-top: 5px; text-align: center;"
+                class="hidden"></p>
         </div>
 
         <button id="autofill-btn" disabled>

@@ -4,52 +4,43 @@ import { GoogleGenerativeAI, GenerativeModel } from '@google/generative-ai';
 class GeminiService {
     private genAI: GoogleGenerativeAI;
     private baseModel: GenerativeModel;
-    private fallbackModel: GenerativeModel;
 
-    constructor() {
-        const apiKey = process.env.GOOGLE_API_KEY;
-        if (!apiKey) {
-            const errorMessage = 'GOOGLE_API_KEY environment variable is missing!';
+    constructor(apiKey?: string) {
+        const key = apiKey || process.env.GOOGLE_API_KEY;
+        if (!key) {
+            const errorMessage = 'GOOGLE_API_KEY environment variable is missing and no key provided!';
             console.error(errorMessage);
             throw new Error(errorMessage);
         }
 
-        this.genAI = new GoogleGenerativeAI(apiKey);
+        this.genAI = new GoogleGenerativeAI(key);
 
-        const modelName = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+        const modelName = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
         this.baseModel = this.genAI.getGenerativeModel({ model: modelName });
 
-        this.fallbackModel = this.genAI.getGenerativeModel({
-            model: 'gemini-2.5-flash-lite'
-        });
-
         if (process.env.NODE_ENV === 'development') {
-            console.log(`Using Gemini model: ${modelName} (Fallback: gemini-2.5-flash-lite)`);
+            console.log(`Using Gemini model: ${modelName}`);
         }
     }
 
-    private async generateWithFallback<T>(
+    private async generateWithRetry<T>(
         operation: (model: GenerativeModel) => Promise<T>,
         operationName: string
     ): Promise<T> {
         try {
             return await operation(this.baseModel);
         } catch (error: any) {
-            if (error.status === 429 || error.status === 503 || error.message?.includes('429')) {
-                console.warn(`${operationName} failed with ${error.status}. Switching to fallback model...`);
-                try {
-                    return await operation(this.fallbackModel);
-                } catch (fallbackError) {
-                    console.error(`${operationName} fallback also failed.`);
-                    throw fallbackError;
-                }
+            if (error.status === 429 || error.status === 503) {
+                console.warn(`${operationName} failed with ${error.status}. Retrying...`);
+               
+                return await operation(this.baseModel);
             }
             throw error;
         }
     }
 
     async generateContent(prompt: string, options?: { responseMimeType?: string }): Promise<string> {
-        return this.generateWithFallback(async (model) => {
+        return this.generateWithRetry(async (model) => {
             let result;
             if (options?.responseMimeType === 'application/json') {
                 const jsonModel = this.genAI.getGenerativeModel({
@@ -68,7 +59,7 @@ class GeminiService {
     }
 
     async generateContentStream(prompt: string) {
-        return this.generateWithFallback(async (model) => {
+        return this.generateWithRetry(async (model) => {
             return await model.generateContentStream(prompt);
         }, 'generateContentStream');
     }
@@ -77,7 +68,12 @@ class GeminiService {
 let geminiServiceInstance: GeminiService | null = null;
 let initializationError: Error | null = null;
 
-export function getGeminiService(): GeminiService {
+export function getGeminiService(apiKey?: string): GeminiService {
+ 
+    if (apiKey) {
+        return new GeminiService(apiKey);
+    }
+
     if (initializationError) {
         throw initializationError;
     }

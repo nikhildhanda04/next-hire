@@ -1,4 +1,4 @@
-// Skill category component
+
 import SkillBadge from '../common/SkillBadge';
 
 interface SkillCategoryProps {

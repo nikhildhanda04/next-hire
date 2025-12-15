@@ -8,10 +8,8 @@ export default function Footer() {
 
     return (
         <footer className="relative w-full pt-32 mt-0">
-            {/* Combined CTA Card - Floating Overlap */}
-    
 
-            {/* Footer Content */}
+    
             <div className="flex flex-col bg-primary w-full overflow-hidden pt-32 pb-10" >
                 <div className="flex flex-col md:flex-row px-8 md:px-44 items-start justify-between gap-12 md:gap-0">
                     <div className="flex flex-col w-full md:w-auto">

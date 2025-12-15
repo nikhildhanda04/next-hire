@@ -3,7 +3,6 @@ import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { prisma } from '@/lib/prisma';
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function GET(_request: NextRequest) {
     try {
         const session = await auth.api.getSession({
@@ -29,7 +28,7 @@ export async function GET(_request: NextRequest) {
                 resumeText: true,
                 experience: true,
                 education: true,
-                // New fields
+                
                 preferredName: true,
                 gender: true,
                 race: true,
@@ -72,7 +71,6 @@ export async function PUT(request: NextRequest) {
             preferredName, gender, race, veteran, disability, citizenship, workAuth, salary, noticePeriod
         } = body;
 
-        // Update user profile
         const updatedUser = await prisma.user.update({
             where: { id: session.user.id },
             data: {

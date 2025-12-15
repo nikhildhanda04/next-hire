@@ -7,7 +7,6 @@ import { useRouter } from 'next/navigation';
 import { useResumeStore } from '@/app/store/resumeStore';
 
 export default function Hero() {
-    // State Management
     const [isDark, setIsDark] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const setResumeData = useResumeStore((state) => state.setResumeData);
@@ -40,8 +39,7 @@ export default function Hero() {
 
             if (file.type === 'application/pdf') {
                 const pdfjs = await import('pdfjs-dist');
-                // Set worker source - use CDN for production builds to avoid module resolution issues
-                // Using version 3.11.174 to match package.json
+              
                 if (typeof window !== 'undefined') {
                     pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`;
                 }
@@ -55,7 +53,7 @@ export default function Hero() {
                 for (let i = 1; i <= numPages; i++) {
                     const page = await pdf.getPage(i);
                     const textContent = await page.getTextContent();
-                    // Extract text from items - TextItem has 'str' property, TextMarkedContent does not
+                 
                     textContentStr += textContent.items
                         .map((item) => ('str' in item ? item.str : ''))
                         .join(' ');
@@ -135,7 +133,6 @@ export default function Hero() {
         }
     };
 
-    // Typing animation state
     const [typedText, setTypedText] = useState("");
     const fullText = "This field is being filled by Next Hire AI...";
 
@@ -214,18 +211,17 @@ export default function Hero() {
                     </div>
                 </div>
 
-                {/* Dashboard Simulation Visuals */}
                 <div className="relative top-10 w-full mt-16 md:mt-24 perspective-distant">
 
-                    {/* Main Dashboard Rectangle */}
+                    {/* Main Dashboard Rectangle  */}
                     <div className="w-full max-w-4xl mx-auto h-[400px] md:h-[500px] bg-white dark:bg-neutral-900 rounded-xl border border-stone-200 dark:border-stone-800 shadow-2xl overflow-hidden relative z-0 md:rotate-x-2 transition-transform duration-700">
-                        {/* Mockup Header */}
+                     
                         <div className="h-10 border-b border-stone-200 dark:border-stone-800 flex items-center px-4 gap-2 bg-stone-50 dark:bg-stone-900/50">
                             <div className="w-3 h-3 rounded-full bg-red-400"></div>
                             <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
                             <div className="w-3 h-3 rounded-full bg-green-400"></div>
                         </div>
-                        {/* Mockup Body - Abstract Blocks */}
+                     
                         <div className="p-6 flex gap-6 h-full">
                             <div className="w-1/4 h-3/4 bg-stone-100 dark:bg-stone-800 rounded-lg animate-pulse" style={{ animationDuration: '5s' }}></div>
                             <div className="flex-1 flex flex-col gap-4 animate-pulse duration-600">

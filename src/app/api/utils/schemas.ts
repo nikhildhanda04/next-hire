@@ -1,4 +1,3 @@
-// JSON schemas for AI prompts
 
 export const resumeOutputSchema = {
     type: 'object',

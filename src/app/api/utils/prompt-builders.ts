@@ -1,4 +1,3 @@
-// Prompt builders for AI requests
 
 import { resumeOutputSchema, atsAnalysisSchema } from './schemas';
 

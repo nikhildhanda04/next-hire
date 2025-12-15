@@ -1,4 +1,4 @@
-// Reusable skill badge component
+
 interface SkillBadgeProps {
     skill: string;
 }

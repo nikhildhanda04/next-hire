@@ -1,4 +1,4 @@
-// Work experience item component
+
 import type { WorkExperience } from '@/app/store/resumeStore';
 
 interface WorkExperienceItemProps {

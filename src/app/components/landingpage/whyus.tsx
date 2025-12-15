@@ -1,26 +1,36 @@
-import { FileText, Zap, MessageSquare, Shield } from "lucide-react";
+import { FileText, Zap, MessageSquare, Shield, Key, Target } from "lucide-react";
 
 export default function Features() {
     const features = [
         {
             icon: <FileText size={32} className="text-blue-500" />,
-            title: "Smart Parsing",
-            description: "Instant resume parsing and extraction of skills, jobs, and education. Just upload your PDF or docx."
+            title: "Smart Context parsing",
+            description: "Stop repeating yourself. Our AI extracts your entire professional history and understands context like a human—ensuring every field is filled with 100% accuracy."
         },
         {
             icon: <Zap size={32} className="text-yellow-500" />,
-            title: "One-Click Autofill",
-            description: "No more copy-pasting. Our Chrome extension autofills complex job applications in seconds."
+            title: "Superhuman Speed",
+            description: "What takes you 15 minutes, takes AI 15 seconds. Fill complex, multi-page applications instantly and apply to 10x more jobs without burnout."
         },
         {
             icon: <MessageSquare size={32} className="text-purple-500" />,
-            title: "Tailored Questions",
-            description: "AI generates personalized answers for specific job questions based on your unique profile."
+            title: "Tailored Responses",
+            description: "Stuck on 'Why us?' or 'Describe a challenge'? AI generates unique, persuasive answers tailored to *your* experience and *that* specific job description. No more generic fluff."
+        },
+        {
+            icon: <Key size={32} className="text-orange-500" />,
+            title: "Unlimited AI Freedom",
+            description: "Bring your own Gemini or OpenAI API key. Control your own model (GPT-4o, Gemini 2.0), enjoy zero rate limits, and run at maximum velocity."
         },
         {
             icon: <Shield size={32} className="text-green-500" />,
-            title: "Privacy First",
-            description: "Your data stays secure. We only use your resume to help you find jobs, never shared without permission."
+            title: "Privacy by Design",
+            description: "Your data creates your advantage, not ours. Your resume and keys are stored locally in your browser and used only to power *your* applications."
+        },
+        {
+            icon: <Target size={32} className="text-red-500" />,
+            title: "ATS Optimization",
+            description: "Beat the bots. We intelligently align your resume keywords with the job description, maximizing your chances of passing automated screenings."
         }
     ];
 

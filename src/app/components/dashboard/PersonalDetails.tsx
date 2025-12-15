@@ -1,4 +1,4 @@
-// Personal details component
+
 import { User, Mail, Phone, MapPin, Linkedin, Github, Globe } from 'lucide-react';
 import SectionCard from '../common/SectionCard';
 

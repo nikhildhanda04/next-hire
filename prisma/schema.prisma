@@ -1,5 +1,4 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
 
 generator client {
   provider = "prisma-client-js"
@@ -44,6 +43,8 @@ model User {
   clearance     String?
   salary        String?
   noticePeriod  String?
+  geminiApiKey  String?
+  openaiApiKey  String?
 
   applications  JobApplication[]
   knowledge     UserKnowledge[]
@@ -116,4 +117,10 @@ model JobApplication {
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   @@index([userId])
+}
+
+model RateLimit {
+  key       String   @id
+  count     Int      @default(0)
+  expiresAt DateTime
 }

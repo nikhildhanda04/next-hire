@@ -1,4 +1,3 @@
-// Type definitions matching the Python Pydantic models
 
 export interface CategorizedSkills {
     programming_languages?: string[];

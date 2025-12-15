@@ -70,9 +70,9 @@ export default function HowItWorks() {
                                 <div className="absolute -top-4 -right-4 w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg">2</div>
                                 <Download className="w-14 h-14 text-primary" />
                             </div>
-                            <h3 className="font-primary text-3xl text-dark dark:text-light mb-3">Install Extension</h3>
+                            <h3 className="font-primary text-3xl text-dark dark:text-light mb-3">Install & Configure</h3>
                             <p className="font-secondary text-stone-500 dark:text-stone-400 text-lg">
-                                Add our Chrome extension.
+                                Add our extension and enter your own OpenAI or Gemini API key for unlimited usage.
                             </p>
                         </div>
                     </div>

@@ -60,8 +60,8 @@ export default function JobsTab({ resumeData, rawResumeText }: JobsTabProps) {
 
                 const result = await response.json();
                 if (result.status === 'success' || result.coverLetter) {
-                    console.log(`Application prepared for ${job.company}`);
-                    // Ideally we'd show the cover letter to the user or save it
+
+
                 }
             } catch (err) {
                 console.error(`Failed to apply to ${job.company}`, err);

@@ -70,8 +70,7 @@ export default function ProfileTab({ resumeData }: ProfileTabProps) {
             });
 
             if (response.ok) {
-                // Update local store to reflect changes immediately
-                // Note: ResumeData type mapping might be needed if structure differs slightly
+
                 const updatedData = {
                     ...resumeData,
                     full_name: formData.name,
@@ -93,13 +92,13 @@ export default function ProfileTab({ resumeData }: ProfileTabProps) {
                     noticePeriod: formData.noticePeriod
                 };
                 setResumeData(updatedData);
-                console.log('Profile updated successfully!');
+
             } else {
-                console.log('Failed to update profile.');
+
             }
         } catch (error) {
             console.error('Error updating profile:', error);
-           
+
         } finally {
             setIsLoading(false);
         }

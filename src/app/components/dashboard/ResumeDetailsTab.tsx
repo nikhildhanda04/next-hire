@@ -19,7 +19,7 @@ const ResumeDetailsTab: React.FC<ResumeDetailsTabProps> = ({ resumeData }) => {
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-6">
-            {/* Left Sidebar (Sticky) */}
+         
             <aside className="lg:col-span-1 lg:sticky lg:top-8 self-start space-y-8">
                 <PersonalDetails
                     fullName={resumeData.full_name}
@@ -71,7 +71,6 @@ const ResumeDetailsTab: React.FC<ResumeDetailsTabProps> = ({ resumeData }) => {
                 )}
             </aside>
 
-            {/* Main Content (Scrollable) */}
             <main className="lg:col-span-2 space-y-8">
                 {resumeData.summary && (
                     <SectionCard title="Summary">

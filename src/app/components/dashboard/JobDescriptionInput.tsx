@@ -1,4 +1,4 @@
-// Job description input component
+
 interface JobDescriptionInputProps {
     value: string;
     onChange: (value: string) => void;

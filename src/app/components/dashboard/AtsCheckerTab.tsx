@@ -1,4 +1,4 @@
-// frontend\src\app\components\dashboard\AtsCheckerTab.tsx
+
 'use client';
 
 import { useState } from 'react';
@@ -7,9 +7,6 @@ import ErrorMessage from '../common/ErrorMessage';
 import LoadingSpinner from '../common/LoadingSpinner';
 import CareerLevelButtons from './CareerLevelButtons';
 import JobDescriptionInput from './JobDescriptionInput';
-
-// --- Type Definitions ---
-// These now match the new, more advanced backend models
 
 interface KeywordAnalysis {
     matching_keywords: string[];
@@ -30,20 +27,18 @@ interface ATSAnalysisResult {
     rewrite_suggestions: RewriteSuggestion[];
 };
 
-// Define the props that this component will accept
 interface AtsCheckerTabProps {
     rawResumeText: string | null;
 }
 
 const AtsCheckerTab: React.FC<AtsCheckerTabProps> = ({ rawResumeText }) => {
-    // State for the ATS feature UI and data
+    
     const [atsInputType, setAtsInputType] = useState<'level' | 'description'>('level');
     const [jobDescription, setJobDescription] = useState('');
     const [atsResult, setAtsResult] = useState<ATSAnalysisResult | null>(null);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    // Function to handle the API call to the backend for analysis
     const handleAnalysisRequest = async (payload: { job_description?: string; career_level?: string }) => {
         setIsAnalyzing(true);
         setAtsResult(null);
@@ -139,7 +134,6 @@ const AtsCheckerTab: React.FC<AtsCheckerTabProps> = ({ rawResumeText }) => {
                 <LoadingSpinner message="Our AI is analyzing your resume... this may take a moment." />
             )}
             
-            {/* --- ENHANCED ATS RESULTS DISPLAY --- */}
             {atsResult && (
                 <div className="mt-8 border-t border-gray-200 dark:border-gray-700 pt-6">
                     <h3 className="text-2xl font-bold text-dark dark:text-light mb-6 text-center">Your Detailed ATS Report</h3>
@@ -183,7 +177,6 @@ const AtsCheckerTab: React.FC<AtsCheckerTabProps> = ({ rawResumeText }) => {
                         </div>
                     </div>
 
-                    {/* --- AI-Powered Optimization Suggestions --- */}
                     {atsResult.rewrite_suggestions && atsResult.rewrite_suggestions.length > 0 && (
                         <div className="mb-6">
                             <h4 className="text-xl font-semibold text-dark dark:text-light mb-4 flex items-center"><Wand2 className="mr-2 text-primary"/>AI-Powered Optimization Suggestions</h4>

@@ -1,4 +1,4 @@
-// Career level buttons component
+
 interface CareerLevelButtonsProps {
     onSelect: (level: string) => void;
     isAnalyzing: boolean;

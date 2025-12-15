@@ -18,14 +18,13 @@ export async function POST(request: NextRequest) {
 
         const parsedData = await parseResumeWithAI(body.resume_text);
 
-        // Attempt to save to DB if user is authenticated
         try {
             const session = await auth.api.getSession({
                 headers: await headers()
             });
 
             if (session?.user) {
-                // Flatten skills for simple array storage
+
                 const skills: string[] = [];
                 if (parsedData.categorized_skills) {
                     Object.values(parsedData.categorized_skills).forEach((skillList) => {
@@ -49,17 +48,17 @@ export async function POST(request: NextRequest) {
                         education: parsedData.education ? JSON.parse(JSON.stringify(parsedData.education)) : undefined,
                     }
                 });
-                console.log(`Saved resume data for user ${session.user.id}`);
+
             }
         } catch (dbError) {
             console.error('Error saving to DB (non-fatal):', dbError);
-            // We don't block the response if DB save fails, just log it
+
         }
 
         return NextResponse.json(parsedData);
     } catch (error) {
         console.error('Error parsing resume:', error);
-        // Log full error details for debugging
+
         if (error instanceof Error) {
             console.error('Error name:', error.name);
             console.error('Error message:', error.message);

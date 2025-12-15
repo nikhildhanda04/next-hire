@@ -5,7 +5,6 @@ import { useResumeStore } from '@/app/store/resumeStore';
 import { Upload, FileText, CheckCircle, RefreshCw, BookOpen, Briefcase, Settings, BarChart, User } from 'lucide-react';
 import { ResumeData } from '@/app/store/resumeStore';
 
-// Import the new child components
 import ResumeDetailsTab from '@/app/components/dashboard/ResumeDetailsTab';
 import AtsCheckerTab from '@/app/components/dashboard/AtsCheckerTab';
 import JobsTab from '@/app/components/dashboard/JobsTab';
@@ -40,7 +39,6 @@ export default function DashboardPage() {
                         github_url: userData.github,
                         portfolio_url: userData.portfolio,
 
-                        // Resume specific fields - might be null/undefined if not parsed yet
                         uncategorized_skills: userData.skills || [],
                         work_experience: userData.experience || [],
                         education: userData.education || [],
@@ -53,7 +51,6 @@ export default function DashboardPage() {
 
                     setResumeData(reconstructedData);
 
-                    // If we have resume text, default to resume tab, else profile
                     if (userData.resumeText) {
                         setActiveTab('resume');
                     } else {
@@ -88,7 +85,7 @@ export default function DashboardPage() {
     }
 
     if (!resumeData) {
-        // Fallback if fetch failed completely
+       
         return <div className="p-8 text-center">Failed to load profile. Please try refreshing.</div>;
     }
 

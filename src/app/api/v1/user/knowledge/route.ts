@@ -29,14 +29,6 @@ export async function POST(request: NextRequest) {
 
         const { key, value } = validation.data;
 
-        // Upsert logic: if we already have an answer for this key (question), update it.
-        // Or should we just create new ones? Let's generic upsert-like logic 
-        // by checking if a very similar key exists? 
-        // For simplicity V1, we just create a new entry. The AI will see the latest ones.
-        // Actually, preventing exact duplicate keys is better.
-
-        // We can do a rudimentary check or just append. 
-        // Let's Append. Time based sort will prioritize new answers.
 
         const knowledge = await prisma.userKnowledge.create({
             data: {

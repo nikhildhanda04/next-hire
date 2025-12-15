@@ -1,4 +1,4 @@
-// Project item component
+
 import { ExternalLink } from 'lucide-react';
 import type { Project } from '@/app/store/resumeStore';
 import SkillBadge from '../common/SkillBadge';
