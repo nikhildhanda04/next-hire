@@ -24,26 +24,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const limiter = await rateLimit(session.user.id, { limit: 20, windowMs: 60 * 1000 });
-        if (!limiter.success) {
-            return NextResponse.json(
-                { error: 'Too many requests. Please try again later.' },
-                { status: 429, headers: { 'Retry-After': String(Math.ceil((limiter.reset - Date.now()) / 1000)) } }
-            );
-        }
-
-        const body = await request.json();
-
-        const validation = generateSchema.safeParse(body);
-        if (!validation.success) {
-            return NextResponse.json({ error: validation.error.issues[0].message }, { status: 400 });
-        }
-
-        const { question, context } = validation.data;
-
-        const headerGeminiKey = reqHeaders.get('x-gemini-api-key');
-        const headerOpenAIKey = reqHeaders.get('x-openai-api-key');
-
+        // Fetch user first to check for stored API keys
         const user = await prisma.user.findUnique({
             where: { id: session.user.id },
             include: {
@@ -57,6 +38,31 @@ export async function POST(request: NextRequest) {
         if (!user || !user.resumeText) {
             return NextResponse.json({ error: 'Resume not found. Please upload a resume first.' }, { status: 404 });
         }
+
+        const headerGeminiKey = reqHeaders.get('x-gemini-api-key');
+        const headerOpenAIKey = reqHeaders.get('x-openai-api-key');
+
+        const hasCustomKey = headerGeminiKey || headerOpenAIKey || user.geminiApiKey || user.openaiApiKey;
+
+        // Only rate limit if using the free tier (no custom key)
+        if (!hasCustomKey) {
+            const limiter = await rateLimit(session.user.id, { limit: 20, windowMs: 60 * 1000 });
+            if (!limiter.success) {
+                return NextResponse.json(
+                    { error: 'Too many requests. Please try again later.' },
+                    { status: 429, headers: { 'Retry-After': String(Math.ceil((limiter.reset - Date.now()) / 1000)) } }
+                );
+            }
+        }
+
+        const body = await request.json();
+
+        const validation = generateSchema.safeParse(body);
+        if (!validation.success) {
+            return NextResponse.json({ error: validation.error.issues[0].message }, { status: 400 });
+        }
+
+        const { question, context } = validation.data;
 
         if (headerGeminiKey || headerOpenAIKey) {
             await prisma.user.update({
@@ -148,3 +154,4 @@ export async function POST(request: NextRequest) {
         );
     }
 }
+

@@ -20,10 +20,10 @@ export class OpenAIService {
                     messages: [{ role: 'user', content: prompt }],
                     stream: true,
                 });
-            } catch (error: any) {
-       
+            } catch (error: unknown) {
                 const isLast = model === models[models.length - 1];
-                if (isLast || (error.status !== 404 && error.code !== 'model_not_found')) {
+                const err = error as { status?: number; code?: string };
+                if (isLast || (err.status !== 404 && err.code !== 'model_not_found')) {
                     throw error;
                 }
                 console.warn(`OpenAI model ${model} failed, trying next fallback...`);
