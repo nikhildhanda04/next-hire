@@ -27,6 +27,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
     if (request.action === 'generate-ai-answer') {
 
+        /* BYOK LOGIC RESTORED */
         chrome.storage.local.get(['geminiApiKey', 'openaiApiKey'], (result) => {
             const headers = {
                 'Content-Type': 'application/json'

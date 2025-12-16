@@ -56,14 +56,99 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
 
     if (request.action === 'ai-stream-error' && activeInput) {
-        activeInput.style.border = '2px solid red';
-        activeInput.placeholder = 'Error: ' + request.error;
+        
+        // Check for specific Exhaustion Error
+        if (request.error && (request.error.includes('broke') || request.error.includes('limit') || request.error.includes('quota'))) {
+            activeInput.style.border = '2px solid red';
+            activeInput.placeholder = 'Limit Reached. Add Key.';
+            
+            // Show Custom Key Input Modal
+            showKeyInputModal(request.error);
+        } else {
+            activeInput.style.border = '2px solid red';
+            activeInput.placeholder = 'Error: ' + request.error;
+        }
+        
         activeInput = null;
 
         isProcessingQueue = false;
-        setTimeout(processQueue, 500);
+        // setTimeout(processQueue, 500); // Do not auto-continue if error is critical
     }
 });
+
+function showKeyInputModal(errorMessage) {
+    // Remove existing modal if any
+    const existing = document.getElementById('next-hire-key-modal');
+    if (existing) existing.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'next-hire-key-modal';
+    modal.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        width: 300px;
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        z-index: 999999;
+        font-family: 'Segoe UI', sans-serif;
+        border: 1px solid #eee;
+        animation: slideIn 0.3s ease-out;
+    `;
+
+    modal.innerHTML = `
+        <style>
+            @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        </style>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h3 style="margin: 0; font-size: 16px; color: #FF9500;">Next Hire AI Limit</h3>
+            <button id="nh-close-btn" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #999;">&times;</button>
+        </div>
+        <p style="font-size: 13px; color: #444; margin-bottom: 15px; line-height: 1.4;">
+            ${errorMessage.includes('broke') ? "I am broke, my AI Key limits are reached! Add your own key to keep using the AI." : errorMessage}
+        </p>
+        <input type="password" id="nh-key-input" placeholder="sk-... or AIza..." style="width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box;">
+        <button id="nh-save-btn" style="width: 100%; padding: 10px; background: #FF9500; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Save & Continue</button>
+        <p id="nh-status" style="font-size: 11px; margin-top: 8px; text-align: center; color: #10b981; display: none;"></p>
+    `;
+
+    document.body.appendChild(modal);
+
+    document.getElementById('nh-close-btn').onclick = () => modal.remove();
+    
+    document.getElementById('nh-save-btn').onclick = () => {
+        const key = document.getElementById('nh-key-input').value.trim();
+        const status = document.getElementById('nh-status');
+        
+        if (!key) return;
+
+        let isGemini = key.startsWith('AIza');
+        let isOpenAI = key.startsWith('sk-');
+
+        if (!isGemini && !isOpenAI) {
+            status.style.color = 'red';
+            status.textContent = 'Invalid Key Format';
+            status.style.display = 'block';
+            return;
+        }
+
+        chrome.storage.local.set({
+            geminiApiKey: isGemini ? key : '',
+            openaiApiKey: isOpenAI ? key : ''
+        }, () => {
+            status.style.color = '#10b981';
+            status.textContent = 'Key Saved! Resuming...';
+            status.style.display = 'block';
+            
+            setTimeout(() => {
+                modal.remove();
+                processQueue(); // Retry current queue
+            }, 1000);
+        });
+    };
+}
 
 function findLabel(input) {
   

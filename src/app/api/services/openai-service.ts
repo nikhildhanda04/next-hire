@@ -11,7 +11,7 @@ export class OpenAIService {
     }
 
     private async createStreamWithFallback(prompt: string) {
-        const models = ['gpt-4o', 'gpt-4-turbo', 'gpt-3.5-turbo'];
+        const models = ['gpt-5.2', 'gpt-4o-mini', 'gpt-3.5-turbo'];
 
         for (const model of models) {
             try {

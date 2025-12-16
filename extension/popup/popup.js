@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let userData = null;
 
+    /* BYOK LOGIC RESTORED */
     chrome.storage.local.get(['geminiApiKey', 'openaiApiKey'], (result) => {
         if (result.geminiApiKey) apiKeyInput.value = result.geminiApiKey;
         if (result.openaiApiKey) apiKeyInput.value = result.openaiApiKey;
