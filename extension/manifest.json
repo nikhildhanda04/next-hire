@@ -5,7 +5,6 @@
     "description": "Autofill job applications with your Next Hire profile data.",
     "permissions": [
         "activeTab",
-        "scripting",
         "storage"
     ],
     "host_permissions": [

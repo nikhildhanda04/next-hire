@@ -1,10 +1,7 @@
-// frontend\src\app\components\common\footer.tsx
 'use client';
+import Link from 'next/link';
 
 export default function Footer() {
-    const handleScrollToTop = () => {
-        window.scrollTo({ top: 0, behavior: "smooth" });
-    };
 
     return (
         <footer className="relative w-full pt-32 mt-0">
@@ -47,9 +44,10 @@ export default function Footer() {
                             Navigation
                         </div>
                         <ul className="text-light text-xl mt-8 space-y-2">
-                            <li className="hover:underline transition-all duration-300 ease-in cursor-pointer">Home</li>
+                            <li className="hover:underline transition-all duration-300 ease-in cursor-pointer"><Link href="/">Home</Link></li>
                             <li className="hover:underline transition-all duration-300 ease-in cursor-pointer">About</li>
                             <li className="hover:underline transition-all duration-300 ease-in cursor-pointer">FAQ</li>
+                            <li className="hover:underline transition-all duration-300 ease-in cursor-pointer"><Link href="/privacy">Privacy Policy</Link></li>
                         </ul>
                     </div>
                 </div>
@@ -58,7 +56,7 @@ export default function Footer() {
                     Next Hire | © 2025 All rights reserved.
                 </div>
 
-                <div className="font-primary text-[15vw] leading-none -mb-[4vw] text-light/10 text-center select-none mt-10">
+                <div className="font-primary text-[15vw] leading-none -mb-[4vw] text-light/10 hover: text-center select-none mt-10">
                     NEXT HIRE
                 </div>
             </div>
