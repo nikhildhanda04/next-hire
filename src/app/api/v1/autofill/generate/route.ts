@@ -130,7 +130,7 @@ export async function POST(request: NextRequest) {
                 // Don't fallback if it's a key/quota issue or explicit client error, user should know their key failed
                 const err = error as { status?: number; statusCode?: number };
                 const status = err.status || err.statusCode;
-                if (status === 401 || status === 403 || status === 429 || status === 404) {
+                if (status === 401 || status === 403 || status === 404) {
                     throw error;
                 }
 
@@ -162,7 +162,7 @@ export async function POST(request: NextRequest) {
                 // Don't fallback if it's a key/quota issue or explicit client error, user should know their key failed
                 const err = error as { status?: number; statusCode?: number };
                 const status = err.status || err.statusCode;
-                if (status === 401 || status === 403 || status === 429 || status === 404) {
+                if (status === 401 || status === 403 || status === 404) {
                     throw error;
                 }
 

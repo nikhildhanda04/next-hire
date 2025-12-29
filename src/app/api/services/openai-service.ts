@@ -49,4 +49,14 @@ export class OpenAIService {
             })()
         };
     }
+
+    async generateContent(prompt: string): Promise<string> {
+        const stream = await this.createStreamWithFallback(prompt);
+        let fullText = '';
+        for await (const chunk of stream) {
+            fullText += chunk.choices[0]?.delta?.content || '';
+        }
+        if (!fullText.trim()) throw new Error('Empty response from OpenAI');
+        return fullText;
+    }
 }

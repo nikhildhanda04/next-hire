@@ -150,50 +150,6 @@ function showKeyInputModal(errorMessage) {
     };
 }
 
-function findLabel(input) {
-  
-    if (input.id) {
-        const label = document.querySelector(`label[for="${input.id}"]`);
-        if (label) return label.innerText;
-    }
-
-    const parentLabel = input.closest('label');
-    if (parentLabel) return parentLabel.innerText;
-
-    const ariaLabel = input.getAttribute('aria-label');
-    if (ariaLabel) return ariaLabel;
-
-    const ariaLabelledBy = input.getAttribute('aria-labelledby');
-    if (ariaLabelledBy) {
-        const labelElement = document.getElementById(ariaLabelledBy);
-        if (labelElement) return labelElement.innerText;
-    }
-
-    let sibling = input.previousElementSibling;
-    while (sibling) {
-        if (sibling.tagName === 'LABEL' || sibling.tagName === 'DIV' || sibling.tagName === 'SPAN' || sibling.tagName === 'P') {
-           
-            if (sibling.innerText && sibling.innerText.length > 0 && sibling.innerText.length < 50) {
-                return sibling.innerText;
-            }
-        }
-        sibling = sibling.previousElementSibling;
-
-        if (!sibling) break;
-    }
-
-    const parent = input.parentElement;
-    if (parent) {
-        let parentSibling = parent.previousElementSibling;
-        if (parentSibling && (parentSibling.tagName === 'LABEL' || parentSibling.tagName === 'DIV')) {
-            if (parentSibling.innerText && parentSibling.innerText.length < 50) {
-                return parentSibling.innerText;
-            }
-        }
-    }
-
-    return '';
-}
 
 function autofillForms(data) {
     const inputs = document.querySelectorAll('input, textarea, select');

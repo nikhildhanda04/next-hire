@@ -136,3 +136,44 @@ export function buildSmartAutofillPrompt(
     5. If the question asks for a "message", "note", or "cover letter" for the employer, write a professional, 2-3 sentence introduction expressing enthusiasm for the role and company. Do NOT output random keywords.
     `;
 }
+
+export function buildBatchAutofillPrompt(
+    questions: { id: string; question: string }[],
+    resumeText: string,
+    userName: string,
+    pageContext?: string,
+    userKnowledge?: { key: string; value: string }[]
+): string {
+    const questionsString = questions.map(q => `- ID: ${q.id}, Question: "${q.question}"`).join('\n');
+    
+    const knowledgeContext = userKnowledge && userKnowledge.length > 0
+        ? `
+    Your Past Answers (User Memory):
+    ${userKnowledge.map(k => `- Question: "${k.key}"\n  Answer: "${k.value}"`).join('\n\n')}
+    `
+        : '';
+
+    return `
+    You are ${userName}. You are filling out a job application.
+    
+    Current Job/Company Context:
+    "${pageContext || 'No specific context provided.'}"
+
+    Your Resume:
+    "${resumeText}"
+
+    ${knowledgeContext}
+
+    Task: Answer the following list of questions. 
+    Return a strictly valid JSON object where keys are the IDs provided and values are the professional, concise answers.
+
+    Questions to Answer:
+    ${questionsString}
+
+    **Rules:**
+    1. Return ONLY the JSON object. No markdown, no explanations.
+    2. Tailor each answer to the CURRENT job context.
+    3. Keep answers crisp and short.
+    4. If you don't have enough info for a specific question, provide a best-effort professional response based on the resume.
+    `;
+}
