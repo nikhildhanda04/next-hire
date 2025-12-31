@@ -58,7 +58,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'ai-stream-error' && activeInput) {
         
         // Check for specific Exhaustion Error
-        if (request.error && (request.error.includes('broke') || request.error.includes('limit') || request.error.includes('quota'))) {
+        if (request.error && (request.error.includes('broke') || request.error.includes('limit') || request.error.includes('quota') || request.error.includes('No API keys available'))) {
             activeInput.style.border = '2px solid red';
             activeInput.placeholder = 'Limit Reached. Add Key.';
             
@@ -83,44 +83,76 @@ function showKeyInputModal(errorMessage) {
 
     const modal = document.createElement('div');
     modal.id = 'next-hire-key-modal';
+    
+    // Ensure modal is isolated and on top
     modal.style.cssText = `
         position: fixed;
         top: 20px;
         right: 20px;
-        width: 300px;
-        background: white;
-        padding: 20px;
+        width: 320px;
+        background: #ffffff;
+        padding: 24px;
         border-radius: 12px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-        z-index: 999999;
-        font-family: 'Segoe UI', sans-serif;
-        border: 1px solid #eee;
-        animation: slideIn 0.3s ease-out;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        z-index: 2147483647; /* Max z-index */
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        border: 1px solid #e5e5e5;
+        animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        pointer-events: auto;
+        color: #333;
+        line-height: 1.5;
     `;
 
     modal.innerHTML = `
         <style>
-            @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+            @keyframes slideIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+            #next-hire-key-modal * { box-sizing: border-box; }
+            .nh-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+            .nh-title { margin: 0; font-size: 16px; font-weight: 700; color: #FF9500; }
+            .nh-close { background: none; border: none; font-size: 24px; cursor: pointer; color: #999; line-height: 1; padding: 0; }
+            .nh-close:hover { color: #333; }
+            .nh-text { font-size: 13px; color: #4b5563; margin-bottom: 16px; }
+            .nh-input { width: 100%; padding: 10px 12px; margin-bottom: 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px; outline: none; transition: border-color 0.2s; }
+            .nh-input:focus { border-color: #FF9500; ring: 2px solid rgba(255, 149, 0, 0.2); }
+            .nh-btn { width: 100%; padding: 10px; background: #FF9500; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; transition: background 0.2s; }
+            .nh-btn:hover { background: #e68a00; }
+            .nh-status { font-size: 12px; margin-top: 8px; text-align: center; display: none; margin-bottom: 0; }
         </style>
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-            <h3 style="margin: 0; font-size: 16px; color: #FF9500;">Next Hire AI Limit</h3>
-            <button id="nh-close-btn" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #999;">&times;</button>
+        <div class="nh-header">
+            <h3 class="nh-title">Next Hire AI Limit</h3>
+            <button id="nh-close-btn" class="nh-close">&times;</button>
         </div>
-        <p style="font-size: 13px; color: #444; margin-bottom: 15px; line-height: 1.4;">
+        <p class="nh-text">
             ${errorMessage.includes('broke') ? "I am broke, my AI Key limits are reached! Add your own key to keep using the AI." : errorMessage}
         </p>
-        <input type="password" id="nh-key-input" placeholder="sk-... or AIza..." style="width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box;">
-        <button id="nh-save-btn" style="width: 100%; padding: 10px; background: #FF9500; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Save & Continue</button>
-        <p id="nh-status" style="font-size: 11px; margin-top: 8px; text-align: center; color: #10b981; display: none;"></p>
+        <input type="password" id="nh-key-input" class="nh-input" placeholder="Paste sk-... or AIza..." autocomplete="off">
+        <button id="nh-save-btn" class="nh-btn">Save & Continue</button>
+        <p id="nh-status" class="nh-status"></p>
     `;
 
     document.body.appendChild(modal);
 
-    document.getElementById('nh-close-btn').onclick = () => modal.remove();
+    const inputInput = modal.querySelector('#nh-key-input');
+    const saveBtn = modal.querySelector('#nh-save-btn');
+    const closeBtn = modal.querySelector('#nh-close-btn');
+    const statusMsg = modal.querySelector('#nh-status');
+
+    // Prevent events from bubbling to the page (crucial for some sites)
+    modal.addEventListener('click', (e) => e.stopPropagation());
+    modal.addEventListener('keydown', (e) => e.stopPropagation());
+    modal.addEventListener('keyup', (e) => e.stopPropagation());
+    modal.addEventListener('keypress', (e) => e.stopPropagation());
+
+    // Auto-focus input
+    setTimeout(() => inputInput.focus(), 100);
+
+    closeBtn.onclick = (e) => {
+        e.stopPropagation();
+        modal.remove();
+    };
     
-    document.getElementById('nh-save-btn').onclick = () => {
-        const key = document.getElementById('nh-key-input').value.trim();
-        const status = document.getElementById('nh-status');
+    const saveKey = () => {
+        const key = inputInput.value.trim();
         
         if (!key) return;
 
@@ -128,9 +160,9 @@ function showKeyInputModal(errorMessage) {
         let isOpenAI = key.startsWith('sk-');
 
         if (!isGemini && !isOpenAI) {
-            status.style.color = 'red';
-            status.textContent = 'Invalid Key Format';
-            status.style.display = 'block';
+            statusMsg.style.color = '#ef4444';
+            statusMsg.textContent = 'Invalid Key Format';
+            statusMsg.style.display = 'block';
             return;
         }
 
@@ -138,9 +170,9 @@ function showKeyInputModal(errorMessage) {
             geminiApiKey: isGemini ? key : '',
             openaiApiKey: isOpenAI ? key : ''
         }, () => {
-            status.style.color = '#10b981';
-            status.textContent = 'Key Saved! Resuming...';
-            status.style.display = 'block';
+            statusMsg.style.color = '#10b981';
+            statusMsg.textContent = 'Key Saved! Resuming...';
+            statusMsg.style.display = 'block';
             
             setTimeout(() => {
                 modal.remove();
@@ -148,11 +180,54 @@ function showKeyInputModal(errorMessage) {
             }, 1000);
         });
     };
+
+    saveBtn.onclick = (e) => {
+        e.stopPropagation();
+        saveKey();
+    };
+
+    inputInput.onkeydown = (e) => {
+        e.stopPropagation(); // Essential to type in some sites
+        if (e.key === 'Enter') {
+            saveKey();
+        }
+    };
 }
 
 
 function autofillForms(data) {
-    const inputs = document.querySelectorAll('input, textarea, select');
+    function getVisibleContainer() {
+        // Prioritize active modals
+        const modalSelectors = [
+            'div[role="dialog"]',
+            '.modal.show',
+            '.modal.in',
+            '.modal-dialog',
+            'div[aria-modal="true"]',
+             // Specific for Internshala and common frameworks
+            '.modal-content' 
+        ];
+
+        for (const selector of modalSelectors) {
+            const elements = document.querySelectorAll(selector);
+            for (const el of elements) {
+                // Check if actually visible
+                if (el.offsetParent !== null && !el.classList.contains('hidden')) {
+                    console.log('Next Hire: Detected active modal:', selector);
+                    return el;
+                }
+            }
+        }
+        return document;
+    }
+
+    const container = getVisibleContainer();
+    const inputs = container.querySelectorAll('input, textarea, select');
+    // If we found a modal, log it
+    if (container !== document) {
+        console.log(`Next Hire: Scoped autofill to modal with ${inputs.length} inputs.`);
+    }
+
     const report = [];
 
     let schoolIndex = 0;

@@ -1,7 +1,7 @@
 
 'use client';
 
-import { Bookmark, Loader2, Sun, Moon } from 'lucide-react';
+import { Bookmark, Loader2, Download } from 'lucide-react';
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useResumeStore } from '@/app/store/resumeStore';
@@ -18,11 +18,7 @@ export default function Hero() {
         setIsDark(document.documentElement.classList.contains('dark'));
     }, []);
 
-    const toggleTheme = () => {
-        const html = document.documentElement;
-        html.classList.toggle('dark');
-        setIsDark(!isDark);
-    };
+
 
     const handleUploadClick = () => {
         fileInputRef.current?.click();
@@ -183,7 +179,7 @@ export default function Hero() {
                     </p>
 
                     {/* CTA Button */}
-                    <div className="mt-4">
+                    <div className="mt-4 flex flex-col md:flex-row gap-4 items-center">
                         <input
                             type="file"
                             ref={fileInputRef}
@@ -194,7 +190,7 @@ export default function Hero() {
                         <button
                             onClick={handleUploadClick}
                             disabled={isLoading}
-                            className="font-secondary text-lg bg-primary text-light px-8 py-4 rounded-full shadow-lg hover:shadow-xl hover:bg-primary/90 transition-all duration-300 flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed group"
+                            className="font-secondary text-lg bg-primary text-light px-8 py-4 rounded-full shadow-lg hover:shadow-xl hover:bg-primary/90 transition-all duration-300 flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed group w-full md:w-auto"
                         >
                             {isLoading ? (
                                 <>
@@ -208,6 +204,15 @@ export default function Hero() {
                                 </>
                             )}
                         </button>
+                        <a
+                            href="https://chromewebstore.google.com/detail/next-hire-autofill/fbjahffkkmjmealnajofcngpoiakmkjj?authuser=0&hl=en"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-secondary text-lg border border-stone-200 dark:border-stone-700 bg-white/30 dark:bg-white/5 backdrop-blur-md shadow-[inset_0_0_12px_rgba(0,0,0,0.05)] hover:shadow-xl hover:bg-white/50 dark:hover:bg-white/10 text-dark dark:text-light px-8 py-4 rounded-full transition-all duration-300 flex items-center justify-center group w-full md:w-auto"
+                        >
+                            Download Extension
+                            <Download className="ml-2 w-5 h-5 group-hover:scale-110 transition-all duration-300" />
+                        </a>
                     </div>
                 </div>
 

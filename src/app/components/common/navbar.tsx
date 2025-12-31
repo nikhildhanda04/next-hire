@@ -2,12 +2,12 @@
 
 'use client'
 
+import Link from "next/link";
 import { LogOut, Sun, Moon } from "lucide-react";
 import { AuthDialog } from "@/components/auth-dialog";
 import { useEffect, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import Image from "next/image";
-
 import { useRouter } from "next/navigation";
 
 export default function Navbar() {
@@ -59,32 +59,44 @@ export default function Navbar() {
                 </div>
                 <div className="font-secondary text-dark dark:text-light text-xs md:text-xl gap-6 md:gap-14 flex flex-row items-center">
 
-                    <a
-                        href="/whyus"
+                    <Link
+                        href="/#features"
                         onClick={(e) => {
-                            e.preventDefault();
-                            scrollToSection("whyus");
+                            if (window.location.pathname === '/' || window.location.pathname === '') {
+                                e.preventDefault();
+                                scrollToSection("features");
+                            }
                         }}
                         className=" hover:text-primary transition-all duration-200 ease-in"
                     >
                         Why Us?
-                    </a>
-                    <a
+                    </Link>
+                    <Link
                         href="/#queries"
                         onClick={(e) => {
-                            e.preventDefault();
-                            scrollToSection("queries");
+                            if (window.location.pathname === '/' || window.location.pathname === '') {
+                                e.preventDefault();
+                                scrollToSection("queries");
+                            }
                         }}
                         className=" hover:text-primary transition-all duration-200 ease-in"
                     >
                         Queries
-                    </a>
+                    </Link>
                     <a
+                        href="https://chromewebstore.google.com/detail/next-hire-autofill/fbjahffkkmjmealnajofcngpoiakmkjj?authuser=0&hl=en"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className=" hover:text-primary transition-all duration-200 ease-in flex items-center gap-1"
+                    >
+                        Get Extension
+                    </a>
+                    <Link
                         href="/dashboard"
                         onClick={handleDashboardClick}
                         className=" hover:text-primary transition-all duration-200 ease-in">
                         Dashboard
-                    </a>
+                    </Link>
 
                     <div className="flex items-center gap-4">
                         <button
